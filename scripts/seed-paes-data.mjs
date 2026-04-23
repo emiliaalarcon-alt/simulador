@@ -168,9 +168,9 @@ try {
       if (sumPond < 50 || sumPond > 110) { skipped++; continue; }
       if (!c.nombre || c.nombre.length < 2) { skipped++; continue; }
 
-      // Strip leading footnote markers like "(2) (10) (27) " from names
+      // Strip footnote markers like "(2)", "(10)", "(27)", "(*)" anywhere in the name
       let cleanName = c.nombre
-        .replace(/^(?:\([\dA-Z*]+\)\s*)+/, "")
+        .replace(/\([\d*][\d*A-Z]*\)/g, "")
         .replace(/\s+/g, " ")
         .trim();
 
