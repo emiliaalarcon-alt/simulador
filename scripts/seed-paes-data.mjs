@@ -110,21 +110,51 @@ const UNI_DEFAULT = {
   "Universidad Viña del Mar": ["Viña del Mar", "Valparaíso"],
 };
 
-function inferRegionAndCiudad(sede, uniName) {
-  // Prefer a real city found in the sede string
-  if (sede) {
-    const upper = sede.toUpperCase();
+// Title-case a city, preserving multi-word names like "Punta Arenas"
+function titleCity(upper) {
+  return upper
+    .toLowerCase()
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+// Santiago comuna names that imply the city is Santiago
+const SANTIAGO_COMUNAS = [
+  "PROVIDENCIA", "LAS CONDES", "ÑUÑOA", "SAN MIGUEL", "LA FLORIDA",
+  "VITACURA", "MACUL", "LA REINA", "PEÑALOLÉN", "RECOLETA", "INDEPENDENCIA",
+  "ESTACIÓN CENTRAL", "QUILICURA", "HUECHURABA", "SAN JOAQUÍN",
+];
+
+function inferRegionAndCiudad(text, uniName) {
+  // Prefer a real city found in the text (sede or nombre)
+  if (text) {
+    const upper = text.toUpperCase();
     for (const [city, region] of Object.entries(CITY_TO_REGION)) {
       if (upper.includes(city)) {
-        const ciudad = city.charAt(0) + city.slice(1).toLowerCase();
-        return { ciudad, region };
+        return { ciudad: titleCity(city), region };
       }
+    }
+    // Santiago comunas → Santiago / Metropolitana
+    for (const comuna of SANTIAGO_COMUNAS) {
+      if (upper.includes(comuna)) return { ciudad: "Santiago", region: "Metropolitana" };
     }
   }
   // Fallback: university default
   const def = UNI_DEFAULT[uniName];
   if (def) return { ciudad: def[0], region: def[1] };
   return { ciudad: "Santiago", region: "Metropolitana" };
+}
+
+// Strip a trailing city/sede from the carrera name when it duplicates the inferred ciudad
+function stripTrailingCity(name, ciudad) {
+  if (!ciudad) return name;
+  const cityUpper = ciudad.toUpperCase();
+  const re = new RegExp(`(?:\\s+(?:${cityUpper}|CAMPUS\\s+\\S+|SEDE\\s+\\S+|CASA\\s+CENTRAL))+\\s*$`, "i");
+  let cleaned = name.replace(re, "").trim();
+  // Also collapse duplicates ("TALCA TALCA")
+  cleaned = cleaned.replace(/\b(\S+)\s+\1\b/gi, "$1").trim();
+  return cleaned || name;
 }
 
 function inferArea(nombre) {
@@ -202,17 +232,23 @@ try {
         skipped++; continue;
       }
 
-      c.nombre = cleanName;
-
       // Try sede first, then fall back to nombre (city often leaks into name during parse)
       let { ciudad, region } = inferRegionAndCiudad(c.sede || "", uni.nombre);
-      if (region === (UNI_DEFAULT[uni.nombre]?.[1] || "Metropolitana")) {
-        const fromName = inferRegionAndCiudad(c.nombre, uni.nombre);
+      const uniDefault = UNI_DEFAULT[uni.nombre];
+      if (uniDefault && region === uniDefault[1] && ciudad === uniDefault[0]) {
+        const fromName = inferRegionAndCiudad(cleanName, uni.nombre);
         if (fromName.region !== region || fromName.ciudad !== ciudad) {
           ciudad = fromName.ciudad;
           region = fromName.region;
         }
       }
+
+      // Strip trailing city/sede tokens from the carrera name now that we know ciudad
+      cleanName = stripTrailingCity(cleanName, ciudad);
+      // Also strip generic trailing punctuation like "-" or ","
+      cleanName = cleanName.replace(/[\s,\-]+$/g, "").trim();
+      if (cleanName.length < 4) { skipped++; continue; }
+      c.nombre = cleanName;
       const area = inferArea(c.nombre);
       const pruebas = inferPruebas(c);
 
