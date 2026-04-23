@@ -167,24 +167,28 @@ export default function CarreraDetail() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-5"
           >
-            {/* Cost & vacancies grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <InfoCard
-                icon={DollarSign}
-                gradient="from-emerald-500 to-teal-600"
-                title="Matrícula Anual"
-                value={CLP(carrera.matriculaAnual)}
-                description="Costo de matrícula anual para el año académico actual."
-                testId="card-matricula"
-              />
-              <InfoCard
-                icon={BookOpen}
-                gradient="from-violet-500 to-purple-600"
-                title="Arancel Anual"
-                value={CLP(carrera.arancelAnual)}
-                description="Costo total del programa académico durante un año completo."
-                testId="card-arancel"
-              />
+            {/* Cost & vacancies grid — costs are hidden when no data is available */}
+            <div className={`grid grid-cols-1 ${(carrera.matriculaAnual != null || carrera.arancelAnual != null) ? "md:grid-cols-3" : ""} gap-4`}>
+              {carrera.matriculaAnual != null && (
+                <InfoCard
+                  icon={DollarSign}
+                  gradient="from-emerald-500 to-teal-600"
+                  title="Matrícula Anual"
+                  value={CLP(carrera.matriculaAnual)}
+                  description="Costo de matrícula anual para el año académico actual."
+                  testId="card-matricula"
+                />
+              )}
+              {carrera.arancelAnual != null && (
+                <InfoCard
+                  icon={BookOpen}
+                  gradient="from-violet-500 to-purple-600"
+                  title="Arancel Anual"
+                  value={CLP(carrera.arancelAnual)}
+                  description="Costo total del programa académico durante un año completo."
+                  testId="card-arancel"
+                />
+              )}
               <InfoCard
                 icon={Target}
                 gradient="from-blue-500 to-sky-600"
