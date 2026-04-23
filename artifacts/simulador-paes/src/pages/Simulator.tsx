@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Rocket, GraduationCap, BookOpen, Building2,
+  GraduationCap, BookOpen, Building2,
   ChevronRight, ChevronLeft, RotateCcw, Trophy, Target,
   Sparkles, Calculator, MapPin
 } from "lucide-react";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/Combobox";
+import { Logo } from "@/components/Logo";
 import { useListCarreras, useGetCarreraFilters, useGetCarrera } from "@workspace/api-client-react";
 
 type Mode = "uni-y-carrera" | "por-carrera" | "por-universidad";
@@ -145,19 +146,11 @@ export default function Simulator() {
   const totalSteps = 4;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <Rocket className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="font-bold text-lg text-foreground leading-none">Simulador PAES</h1>
-              <p className="text-xs text-muted-foreground">Proceso 2025</p>
-            </div>
-          </div>
+          <Logo size="md" />
           {step > 1 && (
             <Button variant="ghost" size="sm" onClick={reset} className="gap-1.5 text-muted-foreground" data-testid="button-reset">
               <RotateCcw className="w-3.5 h-3.5" />
@@ -192,7 +185,7 @@ export default function Simulator() {
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.1, type: "spring" }}
-                  className="inline-flex w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-violet-700 items-center justify-center mb-4 shadow-lg shadow-primary/30"
+                  className="inline-flex w-20 h-20 rounded-3xl bg-gradient-to-br from-sky-500 to-primary items-center justify-center mb-4 shadow-lg shadow-primary/30"
                 >
                   <Sparkles className="w-10 h-10 text-white" />
                 </motion.div>
@@ -215,7 +208,7 @@ export default function Simulator() {
                       icon: GraduationCap,
                       title: "Por Universidad y Carrera",
                       desc: "Simula el puntaje exacto que necesitas para una carrera específica en una universidad",
-                      color: "from-violet-500 to-purple-600",
+                      color: "from-sky-500 to-blue-600",
                       recommended: true,
                     },
                     {
@@ -259,8 +252,8 @@ export default function Simulator() {
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-violet-50 rounded-xl border border-violet-100 text-center">
-                <p className="text-xs text-violet-700 font-medium">
+              <div className="mt-6 p-4 bg-sky-50 rounded-xl border border-sky-100 text-center">
+                <p className="text-xs text-sky-700 font-medium">
                   Recuerda que este es un simulador referencial. Los puntajes de corte cambian cada año.
                 </p>
               </div>
@@ -361,21 +354,21 @@ export default function Simulator() {
               </Button>
 
               {/* Carrera header card */}
-              <div className="bg-gradient-to-br from-primary to-violet-700 text-white rounded-2xl p-5 mb-5 shadow-lg shadow-primary/20">
+              <div className="bg-gradient-to-br from-sky-500 to-primary text-white rounded-2xl p-5 mb-5 shadow-lg shadow-primary/20">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h2 className="text-xl sm:text-2xl font-bold mb-1" data-testid="text-carrera-nombre">{selectedCarrera.nombre}</h2>
-                    <div className="flex items-center gap-1.5 text-violet-100 text-sm">
+                    <div className="flex items-center gap-1.5 text-sky-100 text-sm">
                       <Building2 className="w-3.5 h-3.5" />
                       <span className="truncate">{selectedCarrera.universidad}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-violet-200 text-xs mt-1">
+                    <div className="flex items-center gap-1.5 text-sky-200 text-xs mt-1">
                       <MapPin className="w-3 h-3" />
                       <span>{selectedCarrera.ciudad} • {selectedCarrera.area}</span>
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <div className="text-xs text-violet-200 uppercase tracking-wider">Corte 2024</div>
+                    <div className="text-xs text-sky-200 uppercase tracking-wider">Corte 2024</div>
                     <div className="text-2xl font-bold tabular-nums">
                       {selectedCarrera.puntajeCorte ?? "N/D"}
                     </div>
@@ -402,7 +395,7 @@ export default function Simulator() {
                           <div className="font-semibold text-sm text-foreground">{info.label}</div>
                           <div className="text-xs text-muted-foreground">{info.short}</div>
                         </div>
-                        <div className="px-2.5 py-1 rounded-lg bg-violet-50 text-primary font-bold text-sm tabular-nums" data-testid={`text-ponderacion-${test.key}`}>
+                        <div className="px-2.5 py-1 rounded-lg bg-sky-50 text-primary font-bold text-sm tabular-nums" data-testid={`text-ponderacion-${test.key}`}>
                           {test.ponderacion}%
                         </div>
                         <Input
@@ -425,7 +418,7 @@ export default function Simulator() {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 p-4 bg-gradient-to-br from-violet-50 to-blue-50 rounded-xl border border-violet-100"
+                    className="mt-6 p-4 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl border border-sky-100"
                   >
                     <div className="flex items-center justify-between">
                       <div>

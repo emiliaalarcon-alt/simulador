@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Rocket, LayoutDashboard, BookOpen, Upload, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, BookOpen, Upload, Settings, LogOut } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { clearToken, getToken } from "@/lib/auth";
 
 const navItems = [
@@ -29,15 +30,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside className="w-56 bg-sidebar text-sidebar-foreground flex flex-col fixed h-full z-40">
         <div className="p-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Rocket className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <p className="font-bold text-sm leading-none">Simulador PAES</p>
-              <p className="text-xs text-sidebar-foreground/60 mt-0.5">Admin</p>
-            </div>
-          </div>
+          <Logo size="sm" variant="white" />
+          <p className="text-[10px] text-sidebar-foreground/60 mt-1.5 ml-10 uppercase tracking-widest font-semibold">Admin</p>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">

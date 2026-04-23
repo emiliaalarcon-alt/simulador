@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Rocket, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,11 +38,11 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-violet-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-950 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex w-16 h-16 rounded-2xl bg-primary items-center justify-center mb-4">
-            <Rocket className="w-9 h-9 text-white" />
+            <Logo size="lg" variant="white" showText={false} />
           </div>
           <h1 className="text-2xl font-bold text-white">Panel Admin</h1>
           <p className="text-slate-400 text-sm mt-1">Simulador PAES</p>

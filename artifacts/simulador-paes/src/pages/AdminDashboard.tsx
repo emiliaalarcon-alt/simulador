@@ -48,7 +48,7 @@ export default function AdminDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {[
-            { icon: BookOpen, label: "Carreras", value: stats?.totalCarreras, color: "text-violet-600 bg-violet-50" },
+            { icon: BookOpen, label: "Carreras", value: stats?.totalCarreras, color: "text-blue-600 bg-blue-50" },
             { icon: Building2, label: "Universidades", value: stats?.totalUniversidades, color: "text-blue-600 bg-blue-50" },
             { icon: MapPin, label: "Regiones", value: stats?.totalRegiones, color: "text-green-600 bg-green-50" },
             { icon: Globe, label: "Areas", value: stats?.totalAreas, color: "text-orange-600 bg-orange-50" },
