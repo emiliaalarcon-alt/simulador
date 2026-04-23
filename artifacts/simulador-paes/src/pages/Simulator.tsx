@@ -1,9 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, BookOpen, Building2,
-  ChevronRight, ChevronLeft, RotateCcw, Trophy, Target,
+  ChevronRight, ChevronLeft, RotateCcw, Trophy,
   Sparkles, Calculator, MapPin
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -67,6 +66,7 @@ export default function Simulator() {
   const [universidad, setUniversidad] = useState<string>("");
   const [carreraId, setCarreraId] = useState<number | null>(null);
   const [scores, setScores] = useState<Record<string, string>>({});
+  const [puntajeFinal, setPuntajeFinal] = useState<number | null>(null);
 
   const { data: filters } = useGetCarreraFilters();
   // Fetch all carreras once (used for combobox options on step 2)
@@ -84,6 +84,7 @@ export default function Simulator() {
     setUniversidad("");
     setCarreraId(null);
     setScores({});
+    setPuntajeFinal(null);
   };
 
   const goBack = () => {
@@ -414,33 +415,19 @@ export default function Simulator() {
                   })}
                 </div>
 
-                {/* Live preview */}
-                {puntajeCalculado !== null && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 p-4 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl border border-sky-100"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-xs text-muted-foreground uppercase tracking-wider">Tu puntaje ponderado</div>
-                        <div className="text-3xl font-black text-primary tabular-nums" data-testid="text-puntaje-preview">
-                          {puntajeCalculado}
-                        </div>
-                      </div>
-                      <Target className="w-10 h-10 text-primary/30" />
-                    </div>
-                  </motion.div>
-                )}
-
                 <Button
-                  onClick={() => setStep(4)}
+                  onClick={() => {
+                    if (puntajeCalculado !== null) {
+                      setPuntajeFinal(puntajeCalculado);
+                      setStep(4);
+                    }
+                  }}
                   disabled={!allScoresFilled}
                   className="w-full mt-6 gap-2 h-12 text-base"
                   data-testid="button-simular"
                 >
                   <Sparkles className="w-4 h-4" />
-                  Ver mi simulación
+                  Simular
                 </Button>
 
                 {!allScoresFilled && (
@@ -453,7 +440,7 @@ export default function Simulator() {
           )}
 
           {/* ========== STEP 4: Result ========== */}
-          {step === 4 && selectedCarrera && puntajeCalculado !== null && (
+          {step === 4 && selectedCarrera && puntajeFinal !== null && (
             <motion.div
               key="step4"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -463,7 +450,7 @@ export default function Simulator() {
             >
               {(() => {
                 const diff = selectedCarrera.puntajeCorte != null
-                  ? Math.round((puntajeCalculado - selectedCarrera.puntajeCorte) * 10) / 10
+                  ? Math.round((puntajeFinal - selectedCarrera.puntajeCorte) * 10) / 10
                   : null;
                 const result = getResultColor(diff);
                 const styles = COLOR_STYLES[result.color as keyof typeof COLOR_STYLES];
@@ -494,7 +481,7 @@ export default function Simulator() {
                         <div className="bg-muted rounded-xl p-4 text-center">
                           <div className="text-xs text-muted-foreground uppercase tracking-wider">Tu puntaje</div>
                           <div className="text-3xl font-black text-foreground tabular-nums" data-testid="text-puntaje-final">
-                            {puntajeCalculado}
+                            {puntajeFinal}
                           </div>
                         </div>
                         <div className="bg-muted rounded-xl p-4 text-center">
@@ -517,42 +504,6 @@ export default function Simulator() {
                         </div>
                       )}
                     </div>
-
-                    {/* Carrera info */}
-                    <div className="bg-white rounded-2xl border border-border p-5 mb-4">
-                      <h3 className="font-bold text-foreground mb-3">{selectedCarrera.nombre}</h3>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <div className="text-xs text-muted-foreground">Universidad</div>
-                          <div className="font-semibold text-foreground">{selectedCarrera.universidad}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-muted-foreground">Ciudad</div>
-                          <div className="font-semibold text-foreground">{selectedCarrera.ciudad}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-muted-foreground">Vacantes 2024</div>
-                          <div className="font-semibold text-foreground">{selectedCarrera.vacantes ?? "N/D"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-muted-foreground">Área</div>
-                          <div className="font-semibold text-foreground">{selectedCarrera.area}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* See more details CTA */}
-                    <Link href={`/carrera/${selectedCarrera.id}`}>
-                      <Button
-                        variant="default"
-                        className="w-full gap-2 mb-3 h-12 text-base bg-gradient-to-r from-primary to-sky-600"
-                        data-testid="button-ver-detalles"
-                      >
-                        <Sparkles className="w-4 h-4" />
-                        Ver toda la información de la carrera
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    </Link>
 
                     {/* Actions */}
                     <div className="flex flex-col sm:flex-row gap-2">
