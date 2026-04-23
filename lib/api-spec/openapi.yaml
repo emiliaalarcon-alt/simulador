@@ -3,20 +3,25 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Simulador PAES API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Admin authentication
+  - name: carreras
+    description: Careers and universities data
+  - name: admin
+    description: Admin management
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,7 +29,356 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: adminLogin
+      tags: [auth]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /carreras:
+    get:
+      operationId: listCarreras
+      tags: [carreras]
+      summary: List all published careers
+      parameters:
+        - name: region
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: universidad
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: area
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of careers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Carrera"
+
+  /carreras/filters:
+    get:
+      operationId: getCarreraFilters
+      tags: [carreras]
+      summary: Get available filter options (regions, universities, areas)
+      responses:
+        "200":
+          description: Filter options
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilterOptions"
+
+  /carreras/stats:
+    get:
+      operationId: getCarrerasStats
+      tags: [carreras]
+      summary: Get statistics about careers in the database
+      responses:
+        "200":
+          description: Career stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarrerasStats"
+
+  /carreras/{id}:
+    get:
+      operationId: getCarrera
+      tags: [carreras]
+      summary: Get a single career by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Career details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrera"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/carreras:
+    get:
+      operationId: adminListCarreras
+      tags: [admin]
+      summary: List all careers (admin, including unpublished)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: limit
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Admin career list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCarrerasResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      operationId: createCarrera
+      tags: [admin]
+      summary: Create a new career
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarreraInput"
+      responses:
+        "201":
+          description: Career created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrera"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/carreras/{id}:
+    patch:
+      operationId: updateCarrera
+      tags: [admin]
+      summary: Update a career
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarreraInput"
+      responses:
+        "200":
+          description: Career updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrera"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: deleteCarrera
+      tags: [admin]
+      summary: Delete a career
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/publish:
+    post:
+      operationId: publishChanges
+      tags: [admin]
+      summary: Publish changes (marks all careers as published)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Published successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublishResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/upload-pdf:
+    post:
+      operationId: uploadPdf
+      tags: [admin]
+      summary: Upload a PDF and extract career data
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PdfUploadBody"
+      responses:
+        "200":
+          description: PDF processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PdfUploadResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/settings:
+    get:
+      operationId: getSettings
+      tags: [admin]
+      summary: Get simulator settings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimulatorSettings"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      operationId: updateSettings
+      tags: [admin]
+      summary: Update simulator settings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SimulatorSettingsInput"
+      responses:
+        "200":
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimulatorSettings"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
@@ -34,3 +388,269 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    LoginBody:
+      type: object
+      properties:
+        password:
+          type: string
+      required:
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresIn:
+          type: integer
+      required:
+        - token
+        - expiresIn
+
+    Carrera:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        universidad:
+          type: string
+        ciudad:
+          type: string
+        region:
+          type: string
+        area:
+          type: string
+        vacantes:
+          type: ["integer", "null"]
+        puntajeCorte:
+          type: ["number", "null"]
+        ponderacionCL:
+          type: ["number", "null"]
+        ponderacionM1:
+          type: ["number", "null"]
+        ponderacionM2:
+          type: ["number", "null"]
+        ponderacionCS:
+          type: ["number", "null"]
+        ponderacionHI:
+          type: ["number", "null"]
+        ponderacionNEM:
+          type: ["number", "null"]
+        ponderacionRanking:
+          type: ["number", "null"]
+        pruebasObligatorias:
+          type: string
+        publicado:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - nombre
+        - universidad
+        - ciudad
+        - region
+        - area
+        - publicado
+        - createdAt
+        - updatedAt
+        - pruebasObligatorias
+
+    CarreraInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+        universidad:
+          type: string
+        ciudad:
+          type: string
+        region:
+          type: string
+        area:
+          type: string
+        vacantes:
+          type: ["integer", "null"]
+        puntajeCorte:
+          type: ["number", "null"]
+        ponderacionCL:
+          type: ["number", "null"]
+        ponderacionM1:
+          type: ["number", "null"]
+        ponderacionM2:
+          type: ["number", "null"]
+        ponderacionCS:
+          type: ["number", "null"]
+        ponderacionHI:
+          type: ["number", "null"]
+        ponderacionNEM:
+          type: ["number", "null"]
+        ponderacionRanking:
+          type: ["number", "null"]
+        pruebasObligatorias:
+          type: string
+        publicado:
+          type: boolean
+      required:
+        - nombre
+        - universidad
+        - ciudad
+        - region
+        - area
+        - pruebasObligatorias
+
+    FilterOptions:
+      type: object
+      properties:
+        regiones:
+          type: array
+          items:
+            type: string
+        universidades:
+          type: array
+          items:
+            type: string
+        areas:
+          type: array
+          items:
+            type: string
+      required:
+        - regiones
+        - universidades
+        - areas
+
+    CarrerasStats:
+      type: object
+      properties:
+        totalCarreras:
+          type: integer
+        totalUniversidades:
+          type: integer
+        totalRegiones:
+          type: integer
+        totalAreas:
+          type: integer
+        carrerasPorArea:
+          type: array
+          items:
+            $ref: "#/components/schemas/AreaCount"
+      required:
+        - totalCarreras
+        - totalUniversidades
+        - totalRegiones
+        - totalAreas
+        - carrerasPorArea
+
+    AreaCount:
+      type: object
+      properties:
+        area:
+          type: string
+        count:
+          type: integer
+      required:
+        - area
+        - count
+
+    AdminCarrerasResponse:
+      type: object
+      properties:
+        carreras:
+          type: array
+          items:
+            $ref: "#/components/schemas/Carrera"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - carreras
+        - total
+        - page
+        - limit
+
+    PublishResponse:
+      type: object
+      properties:
+        published:
+          type: integer
+        message:
+          type: string
+      required:
+        - published
+        - message
+
+    SimulatorSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        simuladorActivo:
+          type: boolean
+        anoProcesoActual:
+          type: string
+        mensajeBienvenida:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - simuladorActivo
+        - anoProcesoActual
+        - mensajeBienvenida
+        - updatedAt
+
+    SimulatorSettingsInput:
+      type: object
+      properties:
+        simuladorActivo:
+          type: boolean
+        anoProcesoActual:
+          type: string
+        mensajeBienvenida:
+          type: string
+
+    PdfUploadBody:
+      type: object
+      properties:
+        fileBase64:
+          type: string
+          description: Base64-encoded PDF file content
+        filename:
+          type: string
+      required:
+        - fileBase64
+        - filename
+
+    PdfUploadResult:
+      type: object
+      properties:
+        extracted:
+          type: integer
+        saved:
+          type: integer
+        message:
+          type: string
+        preview:
+          type: array
+          items:
+            $ref: "#/components/schemas/Carrera"
+      required:
+        - extracted
+        - saved
+        - message
+        - preview

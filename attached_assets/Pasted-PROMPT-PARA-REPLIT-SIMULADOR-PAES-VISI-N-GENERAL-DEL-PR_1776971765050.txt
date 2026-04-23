@@ -1,0 +1,130 @@
+PROMPT PARA REPLIT — SIMULADOR PAES
+
+=== VISIÓN GENERAL DEL PROYECTO ===
+Quiero crear una aplicación web completa llamada "Simulador PAES" para estudiantes chilenos. La app tiene DOS roles:
+
+1. ADMINISTRADORA (yo): acceso con contraseña a un panel privado donde puedo subir y actualizar el PDF con los datos de puntajes de corte, carreras, universidades y ponderaciones. Cuando yo hago cambios, los estudiantes ven la versión actualizada.
+
+2. ESTUDIANTES (usuarios públicos): ven el simulador sin login, sin poder editar nada, solo simulando sus puntajes.
+
+=== ARQUITECTURA TÉCNICA ===
+Stack recomendado:
+- Frontend: React + Tailwind CSS
+- Backend: Node.js + Express (o Next.js fullstack)
+- Base de datos: PostgreSQL o SQLite para guardar los datos extraídos del PDF
+- Autenticación admin: JWT con contraseña hardcodeada en variables de entorno (.env)
+- Subida de PDF: multer + extracción automática de datos con pdf-parse o similar
+
+Flujo de datos:
+PDF subido por admin → backend extrae datos → guarda en DB → estudiantes leen desde DB
+
+El estudiante NUNCA ve el PDF ni el panel admin. Solo ve la interfaz pública del simulador.
+
+=== PANEL DE ADMINISTRADORA ===
+Ruta protegida: /admin (acceso solo con contraseña desde .env)
+
+Funciones del panel admin:
+- Subir nuevo PDF con datos PAES actualizados (cada año)
+- Ver tabla con todos los datos cargados: universidad, carrera, ciudad, puntajes de corte, ponderaciones
+- Editar manualmente filas si el PDF no se parsea bien
+- Publicar/despublicar el simulador
+- Vista previa de cómo verán los estudiantes la info
+
+El panel debe tener un botón "Publicar cambios" que refresca los datos para los estudiantes.
+
+=== SIMULADOR PARA ESTUDIANTES ===
+Interfaz pública (sin login). El estudiante puede:
+
+PASO 1 — Ingresar sus puntajes estimados:
+- PAES Competencia Lectora (CL)
+- PAES Matemática 1 (M1)
+- PAES Matemática 2 (M2) — opcional
+- PAES Ciencias (CS) — opcional
+- PAES Historia (HI) — opcional
+- NEM (Notas de Enseñanza Media): puntaje 150–1000
+- Ranking de notas: puntaje 150–1000
+
+PASO 2 — Filtrar carreras:
+- Filtro por región/ciudad
+- Filtro por universidad
+- Filtro por área del conocimiento (Salud, Ingeniería, Humanidades, Arte, etc.)
+- Buscador por nombre de carrera
+
+PASO 3 — Ver resultados:
+- Lista de carreras con: nombre, universidad, ciudad, puntaje de corte último año, diferencia entre puntaje simulado y corte (+/- puntos)
+- Indicador visual: verde (quedas con holgura), amarillo (muy cerca), rojo (no alcanza)
+- El puntaje ponderado se calcula automáticamente según las ponderaciones específicas de cada carrera
+
+CÁLCULO DEL PUNTAJE PONDERADO:
+puntaje_ponderado = (CL * pond_CL) + (M1 * pond_M1) + (M2 * pond_M2) + (CS * pond_CS) + (HI * pond_HI) + (NEM * pond_NEM) + (Ranking * pond_Ranking)
+Donde cada pond_X es el porcentaje de ponderación de esa prueba para esa carrera específica.
+
+PASO 4 — Mensajes motivacionales según resultado:
+- Si superas el corte por más de 50 puntos: "¡Tienes muy buenas chances! Sigue así, tu esfuerzo está dando frutos."
+- Si superas el corte por 1–50 puntos: "¡Estás muy cerca! Con un poco más de preparación puedes lograrlo."
+- Si estás a 1–50 puntos del corte: "¡Ánimo! Estás a solo unos puntos, no te rindas."
+- Si estás a más de 50 puntos del corte: "No te desanimes, hay muchas otras carreras increíbles que se ajustan a tu puntaje."
+- Mensaje siempre al final: "Recuerda que este es solo un simulador referencial. Los puntajes de corte cambian cada año."
+
+=== DATOS DESDE EL PDF ===
+El PDF que subiré tiene datos de puntajes de corte PAES de Chile. El sistema debe extraer y estructurar:
+
+Por cada carrera:
+- Nombre de la carrera
+- Universidad (nombre completo)
+- Ciudad / Sede
+- Región
+- Área del conocimiento
+- Vacantes
+- Puntaje de corte (último proceso)
+- Ponderaciones: % CL, % M1, % M2, % CS, % HI, % NEM, % Ranking
+- Pruebas obligatorias (cuáles son requeridas para postular)
+
+Si el parser automático no logra extraer bien los datos, el admin puede editarlos manualmente en el panel.
+
+=== UX Y DISEÑO ===
+- Diseño moderno, colorido y entretenido (target: estudiantes de 17–18 años)
+- Mobile-first (la mayoría usará celular)
+- Animaciones suaves al mostrar resultados
+- Colores según resultado: verde/amarillo/rojo
+- Logo y nombre: "Simulador PAES" con ícono de estrella o cohete
+- Fuente moderna: Inter o Poppins
+- Cada carrera en una tarjeta (card) con la info clara
+- Barra de progreso o pasos para guiar al estudiante (paso 1, 2, 3)
+- Botón "Simular de nuevo" para reiniciar fácilmente
+
+=== SEGURIDAD Y SEPARACIÓN DE ROLES ===
+- La ruta /admin requiere autenticación con contraseña (guardada en .env como ADMIN_PASSWORD)
+- El token JWT expira en 8 horas
+- Los estudiantes NUNCA tienen acceso a rutas /admin/*
+- Los datos del PDF procesado se guardan en la base de datos; el PDF original no es accesible públicamente
+- Usar HTTPS en producción (Replit lo maneja automáticamente)
+- Rate limiting básico en la API para evitar abuso
+
+=== ESTRUCTURA DE ARCHIVOS SUGERIDA ===
+/
+├── client/                 ← React frontend
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Home.jsx        ← simulador público
+│   │   │   └── Admin.jsx       ← panel admin protegido
+│   │   ├── components/
+│   │   │   ├── PuntajeForm.jsx
+│   │   │   ├── CarreraCard.jsx
+│   │   │   ├── MensajeMotivacional.jsx
+│   │   │   └── FiltrosBusqueda.jsx
+│   │   └── App.jsx
+├── server/                 ← Express backend
+│   ├── routes/
+│   │   ├── auth.js         ← login admin
+│   │   ├── carreras.js     ← CRUD carreras
+│   │   └── upload.js       ← subida PDF
+│   ├── middleware/
+│   │   └── authMiddleware.js
+│   ├── utils/
+│   │   └── pdfParser.js    ← extracción datos PDF
+│   └── index.js
+├── database/
+│   └── schema.sql
+└── .env.example
+
