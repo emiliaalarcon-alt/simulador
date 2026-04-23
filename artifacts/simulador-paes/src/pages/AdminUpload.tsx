@@ -4,11 +4,12 @@ import { useUploadPdf, getAdminListCarrerasQueryKey } from "@workspace/api-clien
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, AlertTriangle } from "lucide-react";
 
 export default function AdminUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<{ extracted: number; saved: number; message: string } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -26,6 +27,7 @@ export default function AdminUpload() {
 
   const handleUpload = async () => {
     if (!file) return;
+    setConfirmOpen(false);
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -90,9 +92,9 @@ export default function AdminUpload() {
             )}
           </div>
 
-          {file && (
+          {file && !confirmOpen && (
             <Button
-              onClick={handleUpload}
+              onClick={() => setConfirmOpen(true)}
               disabled={upload.isPending}
               className="w-full gap-2"
               data-testid="button-upload"
@@ -100,6 +102,41 @@ export default function AdminUpload() {
               <Upload className="w-4 h-4" />
               {upload.isPending ? "Procesando PDF..." : "Subir y procesar PDF"}
             </Button>
+          )}
+
+          {file && confirmOpen && (
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 space-y-3" data-testid="confirm-upload">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-sm text-orange-700">Esta acción reemplaza todas las carreras</p>
+                  <p className="text-xs text-orange-700/80 mt-1">
+                    Se eliminarán las carreras actuales y se cargarán las del nuevo PDF. No se puede deshacer.
+                    Asegúrate de que sea el PDF oficial "Oferta Definitiva" de DEMRE.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleUpload}
+                  disabled={upload.isPending}
+                  variant="destructive"
+                  className="flex-1 gap-2"
+                  data-testid="button-confirm-upload"
+                >
+                  {upload.isPending ? "Procesando..." : "Sí, reemplazar carreras"}
+                </Button>
+                <Button
+                  onClick={() => setConfirmOpen(false)}
+                  disabled={upload.isPending}
+                  variant="outline"
+                  className="flex-1"
+                  data-testid="button-cancel-upload"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
           )}
 
           {/* Result */}
@@ -132,12 +169,13 @@ export default function AdminUpload() {
           )}
 
           <div className="bg-muted/50 rounded-xl p-4">
-            <h3 className="font-semibold text-sm text-foreground mb-2">Informacion importante</h3>
+            <h3 className="font-semibold text-sm text-foreground mb-2">Información importante</h3>
             <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
-              <li>El sistema extraera automaticamente las carreras del PDF</li>
-              <li>Si el parser no extrae bien los datos, podras editarlos manualmente en "Carreras"</li>
-              <li>Las carreras subidas quedan en borrador hasta que uses "Publicar cambios"</li>
-              <li>El PDF original no sera accesible publicamente</li>
+              <li>Usa solo el PDF oficial "Oferta Definitiva" de DEMRE (≈ 600 páginas)</li>
+              <li>El sistema extrae automáticamente las carreras, ponderaciones y vacantes</li>
+              <li>Esta acción <strong>reemplaza</strong> todas las carreras actuales por las del PDF</li>
+              <li>Las carreras quedan publicadas inmediatamente y visibles para los estudiantes</li>
+              <li>Si la extracción falla por cambio de formato, no se modifica la base de datos</li>
             </ul>
           </div>
         </div>

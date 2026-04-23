@@ -11,7 +11,7 @@ import {
   UpdateSettingsBody,
 } from "@workspace/api-zod";
 import { requireAdmin } from "../middlewares/authMiddleware";
-import { parsePdfCarreras } from "../lib/pdfParser";
+import { importPaesPdf } from "../lib/paesParser";
 
 const router: IRouter = Router();
 
@@ -138,42 +138,20 @@ router.post("/admin/upload-pdf", async (req, res): Promise<void> => {
 
   const { fileBase64 } = parsed.data;
 
-  let extracted: Array<Record<string, unknown>> = [];
   try {
     const buffer = Buffer.from(fileBase64, "base64");
-    extracted = await parsePdfCarreras(buffer);
-  } catch (err) {
-    req.log.error({ err }, "Error parsing PDF");
-    res.status(400).json({ error: "Error al procesar el PDF. Verifica que sea un PDF válido con datos PAES." });
-    return;
-  }
-
-  if (extracted.length === 0) {
+    const result = await importPaesPdf(buffer);
     res.json({
-      extracted: 0,
-      saved: 0,
-      message: "No se encontraron carreras en el PDF. Por favor, ingresa los datos manualmente.",
+      extracted: result.extracted,
+      saved: result.saved,
+      message: result.message,
       preview: [],
     });
-    return;
+  } catch (err) {
+    req.log.error({ err }, "Error parsing PDF");
+    const message = err instanceof Error ? err.message : "Error al procesar el PDF.";
+    res.status(400).json({ error: message });
   }
-
-  const saved: Array<Record<string, unknown>> = [];
-  for (const c of extracted) {
-    const [inserted] = await db
-      .insert(carrerasTable)
-      .values(c as Parameters<typeof db.insert>[0] extends { values: infer V } ? V : never)
-      .returning()
-      .catch(() => [null]);
-    if (inserted) saved.push(inserted);
-  }
-
-  res.json({
-    extracted: extracted.length,
-    saved: saved.length,
-    message: `Se extrajeron ${extracted.length} carreras del PDF. ${saved.length} guardadas en la base de datos.`,
-    preview: saved.slice(0, 5),
-  });
 });
 
 router.get("/admin/settings", async (_req, res): Promise<void> => {
