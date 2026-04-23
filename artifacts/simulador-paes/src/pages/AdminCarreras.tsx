@@ -45,6 +45,18 @@ type CarreraForm = {
   ponderacionHI: string;
   ponderacionNEM: string;
   ponderacionRanking: string;
+  puntajeMaximo: string;
+  puntajeMinimo: string;
+  puntajePromedio: string;
+  matriculaAnual: string;
+  arancelAnual: string;
+  cuposBEA: string;
+  cuposPACE: string;
+  cuposMC: string;
+  duracionSemestres: string;
+  jornada: string;
+  modalidad: string;
+  acreditacion: string;
   pruebasObligatorias: string;
   publicado: boolean;
 };
@@ -53,10 +65,16 @@ const emptyForm: CarreraForm = {
   nombre: "", universidad: "", ciudad: "", region: "Región Metropolitana", area: "Salud",
   vacantes: "", puntajeCorte: "", ponderacionCL: "20", ponderacionM1: "20",
   ponderacionM2: "", ponderacionCS: "", ponderacionHI: "", ponderacionNEM: "30",
-  ponderacionRanking: "30", pruebasObligatorias: "CL, M1", publicado: false,
+  ponderacionRanking: "30",
+  puntajeMaximo: "", puntajeMinimo: "", puntajePromedio: "",
+  matriculaAnual: "", arancelAnual: "",
+  cuposBEA: "", cuposPACE: "", cuposMC: "",
+  duracionSemestres: "", jornada: "Diurna", modalidad: "Presencial", acreditacion: "",
+  pruebasObligatorias: "CL, M1", publicado: false,
 };
 
 function parseNum(s: string) { const n = parseFloat(s); return isNaN(n) ? null : n; }
+function parseInt10(s: string) { const n = parseInt(s, 10); return isNaN(n) ? null : n; }
 
 export default function AdminCarreras() {
   const [search, setSearch] = useState("");
@@ -87,6 +105,10 @@ export default function AdminCarreras() {
     ponderacionCL?: number | null; ponderacionM1?: number | null; ponderacionM2?: number | null;
     ponderacionCS?: number | null; ponderacionHI?: number | null;
     ponderacionNEM?: number | null; ponderacionRanking?: number | null;
+    puntajeMaximo?: number | null; puntajeMinimo?: number | null; puntajePromedio?: number | null;
+    matriculaAnual?: number | null; arancelAnual?: number | null;
+    cuposBEA?: number | null; cuposPACE?: number | null; cuposMC?: number | null;
+    duracionSemestres?: number | null; jornada?: string | null; modalidad?: string | null; acreditacion?: string | null;
     pruebasObligatorias: string; publicado: boolean;
   }) => {
     setEditId(c.id);
@@ -105,6 +127,18 @@ export default function AdminCarreras() {
       ponderacionHI: c.ponderacionHI?.toString() ?? "",
       ponderacionNEM: c.ponderacionNEM?.toString() ?? "",
       ponderacionRanking: c.ponderacionRanking?.toString() ?? "",
+      puntajeMaximo: c.puntajeMaximo?.toString() ?? "",
+      puntajeMinimo: c.puntajeMinimo?.toString() ?? "",
+      puntajePromedio: c.puntajePromedio?.toString() ?? "",
+      matriculaAnual: c.matriculaAnual?.toString() ?? "",
+      arancelAnual: c.arancelAnual?.toString() ?? "",
+      cuposBEA: c.cuposBEA?.toString() ?? "",
+      cuposPACE: c.cuposPACE?.toString() ?? "",
+      cuposMC: c.cuposMC?.toString() ?? "",
+      duracionSemestres: c.duracionSemestres?.toString() ?? "",
+      jornada: c.jornada ?? "",
+      modalidad: c.modalidad ?? "",
+      acreditacion: c.acreditacion ?? "",
       pruebasObligatorias: c.pruebasObligatorias,
       publicado: c.publicado,
     });
@@ -118,7 +152,7 @@ export default function AdminCarreras() {
       ciudad: form.ciudad,
       region: form.region,
       area: form.area,
-      vacantes: parseNum(form.vacantes),
+      vacantes: parseInt10(form.vacantes),
       puntajeCorte: parseNum(form.puntajeCorte),
       ponderacionCL: parseNum(form.ponderacionCL),
       ponderacionM1: parseNum(form.ponderacionM1),
@@ -127,6 +161,18 @@ export default function AdminCarreras() {
       ponderacionHI: parseNum(form.ponderacionHI),
       ponderacionNEM: parseNum(form.ponderacionNEM),
       ponderacionRanking: parseNum(form.ponderacionRanking),
+      puntajeMaximo: parseNum(form.puntajeMaximo),
+      puntajeMinimo: parseNum(form.puntajeMinimo),
+      puntajePromedio: parseNum(form.puntajePromedio),
+      matriculaAnual: parseInt10(form.matriculaAnual),
+      arancelAnual: parseInt10(form.arancelAnual),
+      cuposBEA: parseInt10(form.cuposBEA),
+      cuposPACE: parseInt10(form.cuposPACE),
+      cuposMC: parseInt10(form.cuposMC),
+      duracionSemestres: parseInt10(form.duracionSemestres),
+      jornada: form.jornada || null,
+      modalidad: form.modalidad || null,
+      acreditacion: form.acreditacion || null,
       pruebasObligatorias: form.pruebasObligatorias,
       publicado: form.publicado,
     };
@@ -281,29 +327,105 @@ export default function AdminCarreras() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { key: "vacantes", label: "Vacantes" },
-                  { key: "puntajeCorte", label: "Puntaje de corte" },
-                  { key: "ponderacionCL", label: "% CL" },
-                  { key: "ponderacionM1", label: "% M1" },
-                  { key: "ponderacionM2", label: "% M2" },
-                  { key: "ponderacionCS", label: "% CS" },
-                  { key: "ponderacionHI", label: "% HI" },
-                  { key: "ponderacionNEM", label: "% NEM" },
-                  { key: "ponderacionRanking", label: "% Ranking" },
-                ].map(({ key, label }) => (
-                  <div key={key} className="space-y-1">
-                    <Label className="text-xs">{label}</Label>
-                    <Input
-                      type="number"
-                      value={form[key as keyof CarreraForm] as string}
-                      onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))}
-                      placeholder="0"
-                      data-testid={`input-${key}`}
-                    />
-                  </div>
-                ))}
+              {/* Costos y vacantes */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Costos y Vacantes</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "matriculaAnual", label: "Matrícula anual ($)" },
+                    { key: "arancelAnual", label: "Arancel anual ($)" },
+                    { key: "vacantes", label: "Vacantes regulares" },
+                    { key: "cuposBEA", label: "Cupos BEA" },
+                    { key: "cuposPACE", label: "Cupos PACE" },
+                    { key: "cuposMC", label: "Cupos +MC" },
+                  ].map(({ key, label }) => (
+                    <div key={key} className="space-y-1">
+                      <Label className="text-xs">{label}</Label>
+                      <Input
+                        type="number"
+                        value={form[key as keyof CarreraForm] as string}
+                        onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))}
+                        placeholder="0"
+                        data-testid={`input-${key}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Puntajes */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Puntajes PAES</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "puntajeCorte", label: "Puntaje de corte" },
+                    { key: "puntajePromedio", label: "Puntaje promedio" },
+                    { key: "puntajeMinimo", label: "Puntaje mínimo" },
+                    { key: "puntajeMaximo", label: "Puntaje máximo" },
+                  ].map(({ key, label }) => (
+                    <div key={key} className="space-y-1">
+                      <Label className="text-xs">{label}</Label>
+                      <Input
+                        type="number"
+                        value={form[key as keyof CarreraForm] as string}
+                        onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))}
+                        placeholder="0"
+                        data-testid={`input-${key}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Detalles del programa */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Detalles del programa</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "duracionSemestres", label: "Duración (semestres)", type: "number" },
+                    { key: "jornada", label: "Jornada (Diurna/Vespertina)", type: "text" },
+                    { key: "modalidad", label: "Modalidad (Presencial/Online)", type: "text" },
+                    { key: "acreditacion", label: "Acreditación (ej. 7 años)", type: "text" },
+                  ].map(({ key, label, type }) => (
+                    <div key={key} className="space-y-1">
+                      <Label className="text-xs">{label}</Label>
+                      <Input
+                        type={type}
+                        value={form[key as keyof CarreraForm] as string}
+                        onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))}
+                        placeholder=""
+                        data-testid={`input-${key}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Ponderaciones */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Ponderaciones (%)</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { key: "ponderacionCL", label: "CL" },
+                    { key: "ponderacionM1", label: "M1" },
+                    { key: "ponderacionM2", label: "M2" },
+                    { key: "ponderacionCS", label: "CS" },
+                    { key: "ponderacionHI", label: "HI" },
+                    { key: "ponderacionNEM", label: "NEM" },
+                    { key: "ponderacionRanking", label: "Ranking" },
+                  ].map(({ key, label }) => (
+                    <div key={key} className="space-y-1">
+                      <Label className="text-xs">{label}</Label>
+                      <Input
+                        type="number"
+                        value={form[key as keyof CarreraForm] as string}
+                        onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))}
+                        placeholder="0"
+                        data-testid={`input-${key}`}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center gap-2">

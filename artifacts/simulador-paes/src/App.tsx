@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Simulator from "@/pages/Simulator";
+import CarreraDetail from "@/pages/CarreraDetail";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminCarreras from "@/pages/AdminCarreras";
@@ -26,6 +27,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Simulator} />
+      <Route path="/carrera/:id" component={CarreraDetail} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/carreras" component={AdminCarreras} />

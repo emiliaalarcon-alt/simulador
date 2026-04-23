@@ -434,6 +434,30 @@ components:
           type: ["integer", "null"]
         puntajeCorte:
           type: ["number", "null"]
+        puntajeMaximo:
+          type: ["number", "null"]
+        puntajeMinimo:
+          type: ["number", "null"]
+        puntajePromedio:
+          type: ["number", "null"]
+        matriculaAnual:
+          type: ["integer", "null"]
+        arancelAnual:
+          type: ["integer", "null"]
+        cuposBEA:
+          type: ["integer", "null"]
+        cuposPACE:
+          type: ["integer", "null"]
+        cuposMC:
+          type: ["integer", "null"]
+        duracionSemestres:
+          type: ["integer", "null"]
+        jornada:
+          type: ["string", "null"]
+        modalidad:
+          type: ["string", "null"]
+        acreditacion:
+          type: ["string", "null"]
         ponderacionCL:
           type: ["number", "null"]
         ponderacionM1:
@@ -485,6 +509,30 @@ components:
           type: ["integer", "null"]
         puntajeCorte:
           type: ["number", "null"]
+        puntajeMaximo:
+          type: ["number", "null"]
+        puntajeMinimo:
+          type: ["number", "null"]
+        puntajePromedio:
+          type: ["number", "null"]
+        matriculaAnual:
+          type: ["integer", "null"]
+        arancelAnual:
+          type: ["integer", "null"]
+        cuposBEA:
+          type: ["integer", "null"]
+        cuposPACE:
+          type: ["integer", "null"]
+        cuposMC:
+          type: ["integer", "null"]
+        duracionSemestres:
+          type: ["integer", "null"]
+        jornada:
+          type: ["string", "null"]
+        modalidad:
+          type: ["string", "null"]
+        acreditacion:
+          type: ["string", "null"]
         ponderacionCL:
           type: ["number", "null"]
         ponderacionM1:

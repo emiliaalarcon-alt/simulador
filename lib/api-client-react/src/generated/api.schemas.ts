@@ -34,6 +34,30 @@ export interface Carrera {
   /** @nullable */
   puntajeCorte?: number | null;
   /** @nullable */
+  puntajeMaximo?: number | null;
+  /** @nullable */
+  puntajeMinimo?: number | null;
+  /** @nullable */
+  puntajePromedio?: number | null;
+  /** @nullable */
+  matriculaAnual?: number | null;
+  /** @nullable */
+  arancelAnual?: number | null;
+  /** @nullable */
+  cuposBEA?: number | null;
+  /** @nullable */
+  cuposPACE?: number | null;
+  /** @nullable */
+  cuposMC?: number | null;
+  /** @nullable */
+  duracionSemestres?: number | null;
+  /** @nullable */
+  jornada?: string | null;
+  /** @nullable */
+  modalidad?: string | null;
+  /** @nullable */
+  acreditacion?: string | null;
+  /** @nullable */
   ponderacionCL?: number | null;
   /** @nullable */
   ponderacionM1?: number | null;
@@ -63,6 +87,30 @@ export interface CarreraInput {
   vacantes?: number | null;
   /** @nullable */
   puntajeCorte?: number | null;
+  /** @nullable */
+  puntajeMaximo?: number | null;
+  /** @nullable */
+  puntajeMinimo?: number | null;
+  /** @nullable */
+  puntajePromedio?: number | null;
+  /** @nullable */
+  matriculaAnual?: number | null;
+  /** @nullable */
+  arancelAnual?: number | null;
+  /** @nullable */
+  cuposBEA?: number | null;
+  /** @nullable */
+  cuposPACE?: number | null;
+  /** @nullable */
+  cuposMC?: number | null;
+  /** @nullable */
+  duracionSemestres?: number | null;
+  /** @nullable */
+  jornada?: string | null;
+  /** @nullable */
+  modalidad?: string | null;
+  /** @nullable */
+  acreditacion?: string | null;
   /** @nullable */
   ponderacionCL?: number | null;
   /** @nullable */

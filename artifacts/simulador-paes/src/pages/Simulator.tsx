@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, BookOpen, Building2,
@@ -540,6 +541,19 @@ export default function Simulator() {
                       </div>
                     </div>
 
+                    {/* See more details CTA */}
+                    <Link href={`/carrera/${selectedCarrera.id}`}>
+                      <Button
+                        variant="default"
+                        className="w-full gap-2 mb-3 h-12 text-base bg-gradient-to-r from-primary to-sky-600"
+                        data-testid="button-ver-detalles"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        Ver toda la información de la carrera
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+
                     {/* Actions */}
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Button
@@ -557,10 +571,11 @@ export default function Simulator() {
                         className="flex-1 gap-2"
                         data-testid="button-otra-carrera"
                       >
-                        Simular otra carrera
+                        Otra carrera
                       </Button>
                       <Button
                         onClick={reset}
+                        variant="outline"
                         className="flex-1 gap-2"
                         data-testid="button-reiniciar"
                       >

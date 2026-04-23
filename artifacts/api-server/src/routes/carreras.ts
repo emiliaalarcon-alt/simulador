@@ -93,7 +93,7 @@ router.get("/carreras/:id", async (req, res): Promise<void> => {
   const [carrera] = await db
     .select()
     .from(carrerasTable)
-    .where(eq(carrerasTable.id, params.data.id));
+    .where(and(eq(carrerasTable.id, params.data.id), eq(carrerasTable.publicado, true)));
 
   if (!carrera) {
     res.status(404).json({ error: "Carrera no encontrada" });
