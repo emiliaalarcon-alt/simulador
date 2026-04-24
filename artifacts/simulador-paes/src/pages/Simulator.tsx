@@ -3,14 +3,76 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2, MapPinned,
   ChevronRight, ChevronLeft, RotateCcw, Trophy,
-  Sparkles, Calculator, MapPin
+  Sparkles, Calculator, MapPin, Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/Combobox";
 import { Logo } from "@/components/Logo";
-import { useListCarreras, useGetCarreraFilters, useGetCarrera } from "@workspace/api-client-react";
+import { useListCarreras, useGetCarreraFilters, useGetCarrera, useGetPublicSettings } from "@workspace/api-client-react";
+
+const SAFE_CTA_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
+
+function getSafeHref(value: string): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return SAFE_CTA_PROTOCOLS.has(url.protocol) ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+function OrientadoraCard({
+  titulo,
+  mensaje,
+  ctaTexto,
+  ctaUrl,
+}: {
+  titulo: string;
+  mensaje: string;
+  ctaTexto: string;
+  ctaUrl: string;
+}) {
+  const safeHref = getSafeHref(ctaUrl);
+  return (
+    <div
+      className="mt-8 mx-auto max-w-md p-5 bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl border border-rose-200 text-left shadow-sm"
+      data-testid="card-orientadora"
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+          <Heart className="w-5 h-5 text-rose-600" fill="currentColor" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-bold text-rose-900 mb-1" data-testid="text-orientadora-titulo">
+            {titulo}
+          </h3>
+          <p className="text-xs text-rose-800/80 leading-relaxed mb-3" data-testid="text-orientadora-mensaje">
+            {mensaje}
+          </p>
+          {ctaTexto && safeHref ? (
+            <a
+              href={safeHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-900 underline underline-offset-2"
+              data-testid="link-orientadora-cta"
+            >
+              {ctaTexto}
+              <ChevronRight className="w-3 h-3" />
+            </a>
+          ) : ctaTexto ? (
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700" data-testid="text-orientadora-cta">
+              {ctaTexto}
+            </span>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const TEST_LABELS: Record<string, { label: string; short: string }> = {
   CL: { label: "Competencia Lectora", short: "CL" },
@@ -89,6 +151,8 @@ export default function Simulator() {
   const { data: selectedCarrera } = useGetCarrera(carreraId!, {
     query: { enabled: !!carreraId && step >= 3, queryKey: ["sim-carrera", carreraId] }
   });
+  const { data: publicSettings } = useGetPublicSettings();
+  const showOrientadora = !!publicSettings?.orientadoraEnabled;
 
   const reset = () => {
     setStep(1);
@@ -234,6 +298,15 @@ export default function Simulator() {
                     Simulador referencial basado en datos oficiales DEMRE 2026. Los puntajes de corte cambian cada año.
                   </p>
                 </div>
+
+                {showOrientadora && publicSettings && (
+                  <OrientadoraCard
+                    titulo={publicSettings.orientadoraTitulo}
+                    mensaje={publicSettings.orientadoraMensaje}
+                    ctaTexto={publicSettings.orientadoraCtaTexto}
+                    ctaUrl={publicSettings.orientadoraCtaUrl}
+                  />
+                )}
               </div>
             </motion.div>
           )}
@@ -529,6 +602,15 @@ export default function Simulator() {
                         Empezar de nuevo
                       </Button>
                     </div>
+
+                    {showOrientadora && publicSettings && (
+                      <OrientadoraCard
+                        titulo={publicSettings.orientadoraTitulo}
+                        mensaje={publicSettings.orientadoraMensaje}
+                        ctaTexto={publicSettings.orientadoraCtaTexto}
+                        ctaUrl={publicSettings.orientadoraCtaUrl}
+                      />
+                    )}
                   </>
                 );
               })()}

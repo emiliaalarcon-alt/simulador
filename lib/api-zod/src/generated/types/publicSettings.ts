@@ -6,15 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface SimulatorSettings {
-  id: number;
+export interface PublicSettings {
   simuladorActivo: boolean;
-  anoProcesoActual: string;
   mensajeBienvenida: string;
   orientadoraEnabled: boolean;
   orientadoraTitulo: string;
   orientadoraMensaje: string;
   orientadoraCtaTexto: string;
   orientadoraCtaUrl: string;
-  updatedAt: string;
 }

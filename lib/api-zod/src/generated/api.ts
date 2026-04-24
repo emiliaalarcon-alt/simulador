@@ -365,6 +365,19 @@ export const UploadPdfResponse = zod.object({
 });
 
 /**
+ * @summary Get public-facing simulator settings
+ */
+export const GetPublicSettingsResponse = zod.object({
+  simuladorActivo: zod.boolean(),
+  mensajeBienvenida: zod.string(),
+  orientadoraEnabled: zod.boolean(),
+  orientadoraTitulo: zod.string(),
+  orientadoraMensaje: zod.string(),
+  orientadoraCtaTexto: zod.string(),
+  orientadoraCtaUrl: zod.string(),
+});
+
+/**
  * @summary Get simulator settings
  */
 export const GetSettingsResponse = zod.object({
@@ -372,6 +385,11 @@ export const GetSettingsResponse = zod.object({
   simuladorActivo: zod.boolean(),
   anoProcesoActual: zod.string(),
   mensajeBienvenida: zod.string(),
+  orientadoraEnabled: zod.boolean(),
+  orientadoraTitulo: zod.string(),
+  orientadoraMensaje: zod.string(),
+  orientadoraCtaTexto: zod.string(),
+  orientadoraCtaUrl: zod.string(),
   updatedAt: zod.string(),
 });
 
@@ -382,6 +400,11 @@ export const UpdateSettingsBody = zod.object({
   simuladorActivo: zod.boolean().optional(),
   anoProcesoActual: zod.string().optional(),
   mensajeBienvenida: zod.string().optional(),
+  orientadoraEnabled: zod.boolean().optional(),
+  orientadoraTitulo: zod.string().optional(),
+  orientadoraMensaje: zod.string().optional(),
+  orientadoraCtaTexto: zod.string().optional(),
+  orientadoraCtaUrl: zod.string().optional(),
 });
 
 export const UpdateSettingsResponse = zod.object({
@@ -389,5 +412,10 @@ export const UpdateSettingsResponse = zod.object({
   simuladorActivo: zod.boolean(),
   anoProcesoActual: zod.string(),
   mensajeBienvenida: zod.string(),
+  orientadoraEnabled: zod.boolean(),
+  orientadoraTitulo: zod.string(),
+  orientadoraMensaje: zod.string(),
+  orientadoraCtaTexto: zod.string(),
+  orientadoraCtaUrl: zod.string(),
   updatedAt: zod.string(),
 });

@@ -338,6 +338,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /settings/public:
+    get:
+      operationId: getPublicSettings
+      tags: [public]
+      summary: Get public-facing simulator settings
+      responses:
+        "200":
+          description: Public settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSettings"
+
   /admin/settings:
     get:
       operationId: getSettings
@@ -671,6 +684,16 @@ components:
           type: string
         mensajeBienvenida:
           type: string
+        orientadoraEnabled:
+          type: boolean
+        orientadoraTitulo:
+          type: string
+        orientadoraMensaje:
+          type: string
+        orientadoraCtaTexto:
+          type: string
+        orientadoraCtaUrl:
+          type: string
         updatedAt:
           type: string
       required:
@@ -678,6 +701,11 @@ components:
         - simuladorActivo
         - anoProcesoActual
         - mensajeBienvenida
+        - orientadoraEnabled
+        - orientadoraTitulo
+        - orientadoraMensaje
+        - orientadoraCtaTexto
+        - orientadoraCtaUrl
         - updatedAt
 
     SimulatorSettingsInput:
@@ -689,6 +717,42 @@ components:
           type: string
         mensajeBienvenida:
           type: string
+        orientadoraEnabled:
+          type: boolean
+        orientadoraTitulo:
+          type: string
+        orientadoraMensaje:
+          type: string
+        orientadoraCtaTexto:
+          type: string
+        orientadoraCtaUrl:
+          type: string
+
+    PublicSettings:
+      type: object
+      properties:
+        simuladorActivo:
+          type: boolean
+        mensajeBienvenida:
+          type: string
+        orientadoraEnabled:
+          type: boolean
+        orientadoraTitulo:
+          type: string
+        orientadoraMensaje:
+          type: string
+        orientadoraCtaTexto:
+          type: string
+        orientadoraCtaUrl:
+          type: string
+      required:
+        - simuladorActivo
+        - mensajeBienvenida
+        - orientadoraEnabled
+        - orientadoraTitulo
+        - orientadoraMensaje
+        - orientadoraCtaTexto
+        - orientadoraCtaUrl
 
     PdfUploadBody:
       type: object

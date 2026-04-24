@@ -164,10 +164,33 @@ router.get("/admin/settings", async (_req, res): Promise<void> => {
   res.json(settings);
 });
 
+const ALLOWED_CTA_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
+
+function isSafeCtaUrl(value: string): boolean {
+  if (value === "") return true;
+  try {
+    const u = new URL(value);
+    return ALLOWED_CTA_PROTOCOLS.has(u.protocol);
+  } catch {
+    return false;
+  }
+}
+
 router.patch("/admin/settings", async (req, res): Promise<void> => {
   const parsed = UpdateSettingsBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  if (
+    parsed.data.orientadoraCtaUrl !== undefined &&
+    !isSafeCtaUrl(parsed.data.orientadoraCtaUrl)
+  ) {
+    res.status(400).json({
+      error:
+        "El enlace de la orientadora debe estar vacío o usar https://, http://, mailto: o tel:.",
+    });
     return;
   }
 

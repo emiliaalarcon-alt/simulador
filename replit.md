@@ -58,11 +58,12 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - `PUT/DELETE /api/admin/carreras/:id`
 - `POST /api/admin/publish` — publish all drafts
 - `POST /api/admin/upload-pdf` — parse PDF and import careers
-- `GET/PATCH /api/admin/settings` — simulator settings
+- `GET/PATCH /api/admin/settings` — simulator settings (admin)
+- `GET /api/settings/public` — public-facing settings (orientadora message, mensaje bienvenida)
 
 ## Database Schema
 - `carreras` table: career info with ponderaciones (CL/M1/M2/CS/HI/NEM/Ranking), puntajeCorte, publicado
-- `settings` table: simuladorActivo, anoProcesoActual, mensajeBienvenida
+- `settings` table: simuladorActivo, anoProcesoActual, mensajeBienvenida, orientadoraEnabled, orientadoraTitulo, orientadoraMensaje, orientadoraCtaTexto, orientadoraCtaUrl (CTA URL is allowlisted to http/https/mailto/tel both server-side and client-side to prevent javascript:/data: XSS)
 - 20 seed careers pre-loaded
 
 ## Auth

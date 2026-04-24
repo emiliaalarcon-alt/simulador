@@ -21,6 +21,7 @@ export * from "./loginBody";
 export * from "./loginResponse";
 export * from "./pdfUploadBody";
 export * from "./pdfUploadResult";
+export * from "./publicSettings";
 export * from "./publishResponse";
 export * from "./simulatorSettings";
 export * from "./simulatorSettingsInput";

@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import authRouter from "./auth";
 import carrerasRouter from "./carreras";
+import settingsRouter from "./settings";
 import adminRouter from "./admin";
 
 const router: IRouter = Router();
@@ -9,6 +10,7 @@ const router: IRouter = Router();
 router.use(healthRouter);
 router.use(authRouter);
 router.use(carrerasRouter);
+router.use(settingsRouter);
 router.use(adminRouter);
 
 export default router;

@@ -166,6 +166,11 @@ export interface SimulatorSettings {
   simuladorActivo: boolean;
   anoProcesoActual: string;
   mensajeBienvenida: string;
+  orientadoraEnabled: boolean;
+  orientadoraTitulo: string;
+  orientadoraMensaje: string;
+  orientadoraCtaTexto: string;
+  orientadoraCtaUrl: string;
   updatedAt: string;
 }
 
@@ -173,6 +178,21 @@ export interface SimulatorSettingsInput {
   simuladorActivo?: boolean;
   anoProcesoActual?: string;
   mensajeBienvenida?: string;
+  orientadoraEnabled?: boolean;
+  orientadoraTitulo?: string;
+  orientadoraMensaje?: string;
+  orientadoraCtaTexto?: string;
+  orientadoraCtaUrl?: string;
+}
+
+export interface PublicSettings {
+  simuladorActivo: boolean;
+  mensajeBienvenida: string;
+  orientadoraEnabled: boolean;
+  orientadoraTitulo: string;
+  orientadoraMensaje: string;
+  orientadoraCtaTexto: string;
+  orientadoraCtaUrl: string;
 }
 
 export interface PdfUploadBody {

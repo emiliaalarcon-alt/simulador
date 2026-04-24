@@ -31,6 +31,7 @@ import type {
   LoginResponse,
   PdfUploadBody,
   PdfUploadResult,
+  PublicSettings,
   PublishResponse,
   SimulatorSettings,
   SimulatorSettingsInput,
@@ -1079,6 +1080,81 @@ export const useUploadPdf = <
 > => {
   return useMutation(getUploadPdfMutationOptions(options));
 };
+
+/**
+ * @summary Get public-facing simulator settings
+ */
+export const getGetPublicSettingsUrl = () => {
+  return `/api/settings/public`;
+};
+
+export const getPublicSettings = async (
+  options?: RequestInit,
+): Promise<PublicSettings> => {
+  return customFetch<PublicSettings>(getGetPublicSettingsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetPublicSettingsQueryKey = () => {
+  return [`/api/settings/public`] as const;
+};
+
+export const getGetPublicSettingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicSettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetPublicSettingsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPublicSettings>>
+  > = ({ signal }) => getPublicSettings({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicSettings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetPublicSettingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicSettings>>
+>;
+export type GetPublicSettingsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get public-facing simulator settings
+ */
+
+export function useGetPublicSettings<
+  TData = Awaited<ReturnType<typeof getPublicSettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetPublicSettingsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Get simulator settings
