@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Sh7AGF9nlbxsB84GYWDXa"
+uri = "file://attached_assets/generated_images/mat21_logo_ai.png"
+type = "image"
+title = "mat21 logo"
