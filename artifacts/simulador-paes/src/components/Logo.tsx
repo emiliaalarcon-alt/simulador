@@ -1,4 +1,4 @@
-import logoUrl from "@assets/mat21_logo_v7.png";
+import logoUrl from "@assets/mat21_logo_final.png";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg" | "xl";
