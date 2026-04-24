@@ -286,14 +286,14 @@ export default function Simulator() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="pt-8 sm:pt-16"
+              className="pt-2 sm:pt-4"
             >
               <div className="text-center">
                 <motion.div
                   initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.05, type: "spring" }}
-                  className="flex justify-center mb-8"
+                  className="flex justify-center -mb-10 sm:-mb-14"
                 >
                   <Logo size="xl" />
                 </motion.div>

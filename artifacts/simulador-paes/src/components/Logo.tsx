@@ -1,4 +1,4 @@
-import logoUrl from "@assets/Mat21_son_fondo_1777066996806.png";
+import logoUrl from "@assets/Mat21_son_fondo_trim.png";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg" | "xl";
