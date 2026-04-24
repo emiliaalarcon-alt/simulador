@@ -63,7 +63,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 
 ## Database Schema
 - `carreras` table: career info with ponderaciones (CL/M1/M2/CS/HI/NEM/Ranking), puntajeCorte, publicado
-- `settings` table: simuladorActivo, anoProcesoActual, mensajeBienvenida, orientadoraEnabled, orientadoraTitulo, orientadoraMensaje, orientadoraCtaTexto, orientadoraCtaUrl (CTA URL is allowlisted to http/https/mailto/tel both server-side and client-side to prevent javascript:/data: XSS)
+- `settings` table: simuladorActivo, anoProcesoActual, mensajeBienvenida, orientadoraEnabled, orientadoraTitulo, orientadoraMensaje, orientadoraCtaTexto, orientadoraCtaUrl (CTA URL is allowlisted to http/https/mailto/tel both server-side and client-side to prevent javascript:/data: XSS), mensajeMotivacionalEnabled, mensajeMotivacionalTexto (shown only on result screen, supports newlines/emojis)
 - 20 seed careers pre-loaded
 
 ## Auth

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-import { Settings, Heart } from "lucide-react";
+import { Settings, Heart, Rocket } from "lucide-react";
 
 type SettingsForm = {
   simuladorActivo: boolean;
@@ -23,6 +23,8 @@ type SettingsForm = {
   orientadoraMensaje: string;
   orientadoraCtaTexto: string;
   orientadoraCtaUrl: string;
+  mensajeMotivacionalEnabled: boolean;
+  mensajeMotivacionalTexto: string;
 };
 
 export default function AdminSettings() {
@@ -41,6 +43,8 @@ export default function AdminSettings() {
       orientadoraMensaje: "",
       orientadoraCtaTexto: "",
       orientadoraCtaUrl: "",
+      mensajeMotivacionalEnabled: true,
+      mensajeMotivacionalTexto: "",
     },
   });
 
@@ -55,12 +59,15 @@ export default function AdminSettings() {
         orientadoraMensaje: settings.orientadoraMensaje,
         orientadoraCtaTexto: settings.orientadoraCtaTexto,
         orientadoraCtaUrl: settings.orientadoraCtaUrl,
+        mensajeMotivacionalEnabled: settings.mensajeMotivacionalEnabled,
+        mensajeMotivacionalTexto: settings.mensajeMotivacionalTexto,
       });
     }
   }, [settings, reset]);
 
   const simuladorActivo = watch("simuladorActivo");
   const orientadoraEnabled = watch("orientadoraEnabled");
+  const mensajeMotivacionalEnabled = watch("mensajeMotivacionalEnabled");
 
   const onSubmit = (formData: SettingsForm) => {
     update.mutate(
@@ -212,6 +219,54 @@ export default function AdminSettings() {
               />
               <p className="text-xs text-muted-foreground">
                 WhatsApp, calendario o web. Déjalo vacío si solo quieres mostrar el texto.
+              </p>
+            </div>
+          </div>
+
+          {/* Mensaje motivacional (resultado) */}
+          <div className="bg-card border border-card-border rounded-2xl p-5 space-y-5">
+            <div className="flex items-center gap-3 pb-2 border-b border-border">
+              <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center">
+                <Rocket className="w-4 h-4 text-sky-600" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground">Mensaje motivacional del resultado</h2>
+                <p className="text-xs text-muted-foreground">
+                  Aparece solo en la pantalla de resultado, después de simular
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="font-semibold">Mostrar mensaje</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Activa esto para mostrar el mensaje motivacional al final de la simulación
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setValue("mensajeMotivacionalEnabled", !mensajeMotivacionalEnabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${mensajeMotivacionalEnabled ? "bg-sky-500" : "bg-muted"}`}
+                data-testid="toggle-motivacional-enabled"
+              >
+                <span
+                  className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${mensajeMotivacionalEnabled ? "translate-x-6" : "translate-x-1"}`}
+                />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="font-semibold">Texto del mensaje</Label>
+              <textarea
+                {...register("mensajeMotivacionalTexto")}
+                placeholder="Escribe un mensaje de motivación que verán los estudiantes después de simular..."
+                rows={6}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                data-testid="textarea-motivacional-texto"
+              />
+              <p className="text-xs text-muted-foreground">
+                Puedes usar saltos de línea y emojis. Ejemplo: "Cada paso cuenta 💪 Continúa en Mat21.cl 📘🚀".
               </p>
             </div>
           </div>

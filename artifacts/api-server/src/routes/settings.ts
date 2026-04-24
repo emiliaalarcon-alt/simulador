@@ -18,6 +18,8 @@ router.get("/settings/public", async (_req, res): Promise<void> => {
     orientadoraMensaje: settings.orientadoraMensaje,
     orientadoraCtaTexto: settings.orientadoraCtaTexto,
     orientadoraCtaUrl: settings.orientadoraCtaUrl,
+    mensajeMotivacionalEnabled: settings.mensajeMotivacionalEnabled,
+    mensajeMotivacionalTexto: settings.mensajeMotivacionalTexto,
   });
 });
 

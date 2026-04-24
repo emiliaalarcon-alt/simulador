@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2, MapPinned,
   ChevronRight, ChevronLeft, RotateCcw, Trophy,
-  Sparkles, Calculator, MapPin, Heart
+  Sparkles, Calculator, MapPin, Heart, Rocket
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,28 @@ function getSafeHref(value: string): string | null {
   } catch {
     return null;
   }
+}
+
+function MotivacionalCard({ texto }: { texto: string }) {
+  if (!texto.trim()) return null;
+  return (
+    <div
+      className="mt-4 p-5 bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 rounded-2xl border border-sky-200 shadow-sm"
+      data-testid="card-motivacional"
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
+          <Rocket className="w-5 h-5 text-sky-600" />
+        </div>
+        <p
+          className="text-sm text-sky-900/90 leading-relaxed whitespace-pre-line"
+          data-testid="text-motivacional"
+        >
+          {texto}
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function OrientadoraCard({
@@ -602,6 +624,10 @@ export default function Simulator() {
                         Empezar de nuevo
                       </Button>
                     </div>
+
+                    {publicSettings?.mensajeMotivacionalEnabled && (
+                      <MotivacionalCard texto={publicSettings.mensajeMotivacionalTexto} />
+                    )}
 
                     {showOrientadora && publicSettings && (
                       <OrientadoraCard

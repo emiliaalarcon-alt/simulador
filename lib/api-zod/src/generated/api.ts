@@ -375,6 +375,8 @@ export const GetPublicSettingsResponse = zod.object({
   orientadoraMensaje: zod.string(),
   orientadoraCtaTexto: zod.string(),
   orientadoraCtaUrl: zod.string(),
+  mensajeMotivacionalEnabled: zod.boolean(),
+  mensajeMotivacionalTexto: zod.string(),
 });
 
 /**
@@ -390,6 +392,8 @@ export const GetSettingsResponse = zod.object({
   orientadoraMensaje: zod.string(),
   orientadoraCtaTexto: zod.string(),
   orientadoraCtaUrl: zod.string(),
+  mensajeMotivacionalEnabled: zod.boolean(),
+  mensajeMotivacionalTexto: zod.string(),
   updatedAt: zod.string(),
 });
 
@@ -405,6 +409,8 @@ export const UpdateSettingsBody = zod.object({
   orientadoraMensaje: zod.string().optional(),
   orientadoraCtaTexto: zod.string().optional(),
   orientadoraCtaUrl: zod.string().optional(),
+  mensajeMotivacionalEnabled: zod.boolean().optional(),
+  mensajeMotivacionalTexto: zod.string().optional(),
 });
 
 export const UpdateSettingsResponse = zod.object({
@@ -417,5 +423,7 @@ export const UpdateSettingsResponse = zod.object({
   orientadoraMensaje: zod.string(),
   orientadoraCtaTexto: zod.string(),
   orientadoraCtaUrl: zod.string(),
+  mensajeMotivacionalEnabled: zod.boolean(),
+  mensajeMotivacionalTexto: zod.string(),
   updatedAt: zod.string(),
 });

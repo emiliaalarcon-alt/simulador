@@ -12,6 +12,8 @@ export const settingsTable = pgTable("settings", {
   orientadoraMensaje: text("orientadora_mensaje").notNull().default("Recuerda que en MAT 21 contamos con un equipo de orientación vocacional que te acompaña con técnicas de estudio y la elección de la carrera ideal para ti."),
   orientadoraCtaTexto: text("orientadora_cta_texto").notNull().default("Habla con nuestra orientadora"),
   orientadoraCtaUrl: text("orientadora_cta_url").notNull().default(""),
+  mensajeMotivacionalEnabled: boolean("mensaje_motivacional_enabled").notNull().default(true),
+  mensajeMotivacionalTexto: text("mensaje_motivacional_texto").notNull().default("Y porque en el camino a cumplir tus sueños cada paso cuenta, estamos para seguir apoyándote 💪\n\nPuedes continuar tu preparación en: nuestra plataforma de videos en Mat21.cl, resolviendo dudas directamente con tu profesor a través de la app Mat21 o mejorando tus técnicas de estudio con nuestro equipo de orientación 📘🚀"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 

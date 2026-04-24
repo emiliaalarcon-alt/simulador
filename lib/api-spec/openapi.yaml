@@ -694,6 +694,10 @@ components:
           type: string
         orientadoraCtaUrl:
           type: string
+        mensajeMotivacionalEnabled:
+          type: boolean
+        mensajeMotivacionalTexto:
+          type: string
         updatedAt:
           type: string
       required:
@@ -706,6 +710,8 @@ components:
         - orientadoraMensaje
         - orientadoraCtaTexto
         - orientadoraCtaUrl
+        - mensajeMotivacionalEnabled
+        - mensajeMotivacionalTexto
         - updatedAt
 
     SimulatorSettingsInput:
@@ -727,6 +733,10 @@ components:
           type: string
         orientadoraCtaUrl:
           type: string
+        mensajeMotivacionalEnabled:
+          type: boolean
+        mensajeMotivacionalTexto:
+          type: string
 
     PublicSettings:
       type: object
@@ -745,6 +755,10 @@ components:
           type: string
         orientadoraCtaUrl:
           type: string
+        mensajeMotivacionalEnabled:
+          type: boolean
+        mensajeMotivacionalTexto:
+          type: string
       required:
         - simuladorActivo
         - mensajeBienvenida
@@ -753,6 +767,8 @@ components:
         - orientadoraMensaje
         - orientadoraCtaTexto
         - orientadoraCtaUrl
+        - mensajeMotivacionalEnabled
+        - mensajeMotivacionalTexto
 
     PdfUploadBody:
       type: object

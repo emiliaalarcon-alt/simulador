@@ -16,5 +16,7 @@ export interface SimulatorSettings {
   orientadoraMensaje: string;
   orientadoraCtaTexto: string;
   orientadoraCtaUrl: string;
+  mensajeMotivacionalEnabled: boolean;
+  mensajeMotivacionalTexto: string;
   updatedAt: string;
 }

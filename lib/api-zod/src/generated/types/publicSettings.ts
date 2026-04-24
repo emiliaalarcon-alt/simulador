@@ -14,4 +14,6 @@ export interface PublicSettings {
   orientadoraMensaje: string;
   orientadoraCtaTexto: string;
   orientadoraCtaUrl: string;
+  mensajeMotivacionalEnabled: boolean;
+  mensajeMotivacionalTexto: string;
 }

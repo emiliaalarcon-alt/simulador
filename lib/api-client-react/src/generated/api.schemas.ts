@@ -171,6 +171,8 @@ export interface SimulatorSettings {
   orientadoraMensaje: string;
   orientadoraCtaTexto: string;
   orientadoraCtaUrl: string;
+  mensajeMotivacionalEnabled: boolean;
+  mensajeMotivacionalTexto: string;
   updatedAt: string;
 }
 
@@ -183,6 +185,8 @@ export interface SimulatorSettingsInput {
   orientadoraMensaje?: string;
   orientadoraCtaTexto?: string;
   orientadoraCtaUrl?: string;
+  mensajeMotivacionalEnabled?: boolean;
+  mensajeMotivacionalTexto?: string;
 }
 
 export interface PublicSettings {
@@ -193,6 +197,8 @@ export interface PublicSettings {
   orientadoraMensaje: string;
   orientadoraCtaTexto: string;
   orientadoraCtaUrl: string;
+  mensajeMotivacionalEnabled: boolean;
+  mensajeMotivacionalTexto: string;
 }
 
 export interface PdfUploadBody {
