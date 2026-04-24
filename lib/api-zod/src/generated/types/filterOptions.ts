@@ -8,6 +8,7 @@
 
 export interface FilterOptions {
   regiones: string[];
+  ciudades: string[];
   universidades: string[];
   areas: string[];
 }

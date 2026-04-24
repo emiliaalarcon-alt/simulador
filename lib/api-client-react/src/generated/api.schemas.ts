@@ -131,6 +131,7 @@ export interface CarreraInput {
 
 export interface FilterOptions {
   regiones: string[];
+  ciudades: string[];
   universidades: string[];
   areas: string[];
 }
@@ -195,6 +196,10 @@ export type ListCarrerasParams = {
   /**
    * @nullable
    */
+  ciudad?: string | null;
+  /**
+   * @nullable
+   */
   universidad?: string | null;
   /**
    * @nullable
@@ -204,6 +209,17 @@ export type ListCarrerasParams = {
    * @nullable
    */
   search?: string | null;
+};
+
+export type GetCarreraFiltersParams = {
+  /**
+   * @nullable
+   */
+  ciudad?: string | null;
+  /**
+   * @nullable
+   */
+  universidad?: string | null;
 };
 
 export type AdminListCarrerasParams = {

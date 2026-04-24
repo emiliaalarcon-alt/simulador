@@ -24,6 +24,7 @@ import type {
   CarrerasStats,
   ErrorResponse,
   FilterOptions,
+  GetCarreraFiltersParams,
   HealthStatus,
   ListCarrerasParams,
   LoginBody,
@@ -300,43 +301,62 @@ export function useListCarreras<
 }
 
 /**
- * @summary Get available filter options (regions, universities, areas)
+ * @summary Get available filter options (regions, cities, universities, areas)
  */
-export const getGetCarreraFiltersUrl = () => {
-  return `/api/carreras/filters`;
+export const getGetCarreraFiltersUrl = (params?: GetCarreraFiltersParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/carreras/filters?${stringifiedParams}`
+    : `/api/carreras/filters`;
 };
 
 export const getCarreraFilters = async (
+  params?: GetCarreraFiltersParams,
   options?: RequestInit,
 ): Promise<FilterOptions> => {
-  return customFetch<FilterOptions>(getGetCarreraFiltersUrl(), {
+  return customFetch<FilterOptions>(getGetCarreraFiltersUrl(params), {
     ...options,
     method: "GET",
   });
 };
 
-export const getGetCarreraFiltersQueryKey = () => {
-  return [`/api/carreras/filters`] as const;
+export const getGetCarreraFiltersQueryKey = (
+  params?: GetCarreraFiltersParams,
+) => {
+  return [`/api/carreras/filters`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetCarreraFiltersQueryOptions = <
   TData = Awaited<ReturnType<typeof getCarreraFilters>>,
   TError = ErrorType<unknown>,
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getCarreraFilters>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}) => {
+>(
+  params?: GetCarreraFiltersParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCarreraFilters>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetCarreraFiltersQueryKey();
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCarreraFiltersQueryKey(params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getCarreraFilters>>
-  > = ({ signal }) => getCarreraFilters({ signal, ...requestOptions });
+  > = ({ signal }) => getCarreraFilters(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getCarreraFilters>>,
@@ -351,21 +371,24 @@ export type GetCarreraFiltersQueryResult = NonNullable<
 export type GetCarreraFiltersQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get available filter options (regions, universities, areas)
+ * @summary Get available filter options (regions, cities, universities, areas)
  */
 
 export function useGetCarreraFilters<
   TData = Awaited<ReturnType<typeof getCarreraFilters>>,
   TError = ErrorType<unknown>,
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getCarreraFilters>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetCarreraFiltersQueryOptions(options);
+>(
+  params?: GetCarreraFiltersParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCarreraFilters>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCarreraFiltersQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

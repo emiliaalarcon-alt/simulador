@@ -6,11 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ListCarrerasParams = {
-  /**
-   * @nullable
-   */
-  region?: string | null;
+export type GetCarreraFiltersParams = {
   /**
    * @nullable
    */
@@ -19,12 +15,4 @@ export type ListCarrerasParams = {
    * @nullable
    */
   universidad?: string | null;
-  /**
-   * @nullable
-   */
-  area?: string | null;
-  /**
-   * @nullable
-   */
-  search?: string | null;
 };

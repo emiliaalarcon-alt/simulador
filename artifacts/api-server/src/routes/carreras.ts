@@ -1,9 +1,10 @@
 import { Router, type IRouter } from "express";
-import { eq, ilike, and, or, sql } from "drizzle-orm";
+import { eq, ilike, and, or } from "drizzle-orm";
 import { db, carrerasTable } from "@workspace/db";
 import {
   ListCarrerasQueryParams,
   GetCarreraParams,
+  GetCarreraFiltersQueryParams,
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -15,11 +16,12 @@ router.get("/carreras", async (req, res): Promise<void> => {
     return;
   }
 
-  const { region, universidad, area, search } = query.data;
+  const { region, ciudad, universidad, area, search } = query.data;
 
   const conditions = [eq(carrerasTable.publicado, true)];
 
   if (region) conditions.push(eq(carrerasTable.region, region));
+  if (ciudad) conditions.push(eq(carrerasTable.ciudad, ciudad));
   if (universidad) conditions.push(eq(carrerasTable.universidad, universidad));
   if (area) conditions.push(eq(carrerasTable.area, area));
   if (search) {
@@ -40,21 +42,34 @@ router.get("/carreras", async (req, res): Promise<void> => {
   res.json(carreras);
 });
 
-router.get("/carreras/filters", async (_req, res): Promise<void> => {
+router.get("/carreras/filters", async (req, res): Promise<void> => {
+  const query = GetCarreraFiltersQueryParams.safeParse(req.query);
+  if (!query.success) {
+    res.status(400).json({ error: query.error.message });
+    return;
+  }
+  const { ciudad, universidad } = query.data;
+
+  const conditions = [eq(carrerasTable.publicado, true)];
+  if (ciudad) conditions.push(eq(carrerasTable.ciudad, ciudad));
+  if (universidad) conditions.push(eq(carrerasTable.universidad, universidad));
+
   const result = await db
     .select({
       region: carrerasTable.region,
+      ciudad: carrerasTable.ciudad,
       universidad: carrerasTable.universidad,
       area: carrerasTable.area,
     })
     .from(carrerasTable)
-    .where(eq(carrerasTable.publicado, true));
+    .where(and(...conditions));
 
   const regiones = [...new Set(result.map((r) => r.region))].sort();
+  const ciudades = [...new Set(result.map((r) => r.ciudad))].sort();
   const universidades = [...new Set(result.map((r) => r.universidad))].sort();
   const areas = [...new Set(result.map((r) => r.area))].sort();
 
-  res.json({ regiones, universidades, areas });
+  res.json({ regiones, ciudades, universidades, areas });
 });
 
 router.get("/carreras/stats", async (_req, res): Promise<void> => {

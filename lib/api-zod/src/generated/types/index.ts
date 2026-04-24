@@ -14,6 +14,7 @@ export * from "./carreraInput";
 export * from "./carrerasStats";
 export * from "./errorResponse";
 export * from "./filterOptions";
+export * from "./getCarreraFiltersParams";
 export * from "./healthStatus";
 export * from "./listCarrerasParams";
 export * from "./loginBody";

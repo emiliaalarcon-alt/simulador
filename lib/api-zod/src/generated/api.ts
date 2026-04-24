@@ -31,6 +31,7 @@ export const AdminLoginResponse = zod.object({
  */
 export const ListCarrerasQueryParams = zod.object({
   region: zod.coerce.string().nullish(),
+  ciudad: zod.coerce.string().nullish(),
   universidad: zod.coerce.string().nullish(),
   area: zod.coerce.string().nullish(),
   search: zod.coerce.string().nullish(),
@@ -72,10 +73,16 @@ export const ListCarrerasResponseItem = zod.object({
 export const ListCarrerasResponse = zod.array(ListCarrerasResponseItem);
 
 /**
- * @summary Get available filter options (regions, universities, areas)
+ * @summary Get available filter options (regions, cities, universities, areas)
  */
+export const GetCarreraFiltersQueryParams = zod.object({
+  ciudad: zod.coerce.string().nullish(),
+  universidad: zod.coerce.string().nullish(),
+});
+
 export const GetCarreraFiltersResponse = zod.object({
   regiones: zod.array(zod.string()),
+  ciudades: zod.array(zod.string()),
   universidades: zod.array(zod.string()),
   areas: zod.array(zod.string()),
 });

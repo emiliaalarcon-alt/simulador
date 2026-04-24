@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  GraduationCap, BookOpen, Building2,
+  GraduationCap, BookOpen, Building2, MapPinned,
   ChevronRight, ChevronLeft, RotateCcw, Trophy,
   Sparkles, Calculator, MapPin
 } from "lucide-react";
@@ -12,7 +12,7 @@ import { Combobox } from "@/components/Combobox";
 import { Logo } from "@/components/Logo";
 import { useListCarreras, useGetCarreraFilters, useGetCarrera } from "@workspace/api-client-react";
 
-type Mode = "uni-y-carrera" | "por-carrera" | "por-universidad";
+type Mode = "uni-y-carrera" | "por-carrera" | "por-universidad" | "por-ciudad";
 
 const TEST_LABELS: Record<string, { label: string; short: string }> = {
   CL: { label: "Competencia Lectora", short: "CL" },
@@ -63,16 +63,28 @@ const COLOR_STYLES = {
 export default function Simulator() {
   const [step, setStep] = useState(1);
   const [mode, setMode] = useState<Mode | null>(null);
+  const [ciudad, setCiudad] = useState<string>("");
   const [universidad, setUniversidad] = useState<string>("");
   const [carreraId, setCarreraId] = useState<number | null>(null);
   const [scores, setScores] = useState<Record<string, string>>({});
   const [puntajeFinal, setPuntajeFinal] = useState<number | null>(null);
 
+  // Global (unfiltered) filter options — used for the universidad selector in
+  // uni-y-carrera / por-universidad modes and for the ciudades list in por-ciudad.
   const { data: filters } = useGetCarreraFilters();
-  // Fetch all carreras once (used for combobox options on step 2)
+  // City-scoped filters — used by por-ciudad mode to constrain the universidades
+  // to those that actually appear in the selected city.
+  const { data: cityFilters } = useGetCarreraFilters(
+    { ciudad: ciudad || undefined },
+    { query: { enabled: mode === "por-ciudad" && !!ciudad, queryKey: ["sim-city-filters", ciudad] } }
+  );
+  // Fetch carreras for the current selectors (used for combobox options on step 2)
   const { data: allCarreras } = useListCarreras(
-    { universidad: universidad || undefined },
-    { query: { enabled: step === 2, queryKey: ["sim-carreras", universidad, mode] } }
+    {
+      universidad: universidad || undefined,
+      ciudad: mode === "por-ciudad" ? (ciudad || undefined) : undefined,
+    },
+    { query: { enabled: step === 2, queryKey: ["sim-carreras", universidad, ciudad, mode] } }
   );
   const { data: selectedCarrera } = useGetCarrera(carreraId!, {
     query: { enabled: !!carreraId && step >= 3, queryKey: ["sim-carrera", carreraId] }
@@ -81,6 +93,7 @@ export default function Simulator() {
   const reset = () => {
     setStep(1);
     setMode(null);
+    setCiudad("");
     setUniversidad("");
     setCarreraId(null);
     setScores({});
@@ -133,7 +146,18 @@ export default function Simulator() {
   }, [carreraId]);
 
   const universidadOptions = useMemo(
-    () => filters?.universidades.map(u => ({ value: u, label: u })) ?? [],
+    () => filters?.universidades?.map(u => ({ value: u, label: u })) ?? [],
+    [filters]
+  );
+
+  // Universidades scoped to the selected city for por-ciudad mode.
+  const universidadOptionsByCiudad = useMemo(
+    () => cityFilters?.universidades?.map(u => ({ value: u, label: u })) ?? [],
+    [cityFilters]
+  );
+
+  const ciudadOptions = useMemo(
+    () => filters?.ciudades?.map(c => ({ value: c, label: c })) ?? [],
     [filters]
   );
 
@@ -146,9 +170,11 @@ export default function Simulator() {
           ? `${c.nombre} — ${c.universidad} (${c.ciudad})`
           : mode === "por-universidad"
           ? `${c.nombre} (${c.ciudad})`
-          : c.nombre,
+          : mode === "por-ciudad"
+          ? (universidad ? `${c.nombre}` : `${c.nombre} — ${c.universidad}`)
+          : `${c.nombre} (${c.ciudad})`,
     }));
-  }, [allCarreras, mode]);
+  }, [allCarreras, mode, universidad]);
 
   const totalSteps = 4;
 
@@ -232,10 +258,23 @@ export default function Simulator() {
                       desc: "Explora todas las carreras disponibles en una universidad",
                       color: "from-emerald-500 to-teal-600",
                     },
+                    {
+                      id: "por-ciudad" as Mode,
+                      icon: MapPinned,
+                      title: "Por Ciudad",
+                      desc: "Encuentra carreras en una ciudad específica del país",
+                      color: "from-amber-500 to-orange-600",
+                    },
                   ].map((opt) => (
                     <button
                       key={opt.id}
-                      onClick={() => { setMode(opt.id); setStep(2); }}
+                      onClick={() => {
+                        setMode(opt.id);
+                        setCiudad("");
+                        setUniversidad("");
+                        setCarreraId(null);
+                        setStep(2);
+                      }}
                       className="group relative bg-white rounded-2xl border-2 border-border p-5 text-left hover:border-primary hover:shadow-lg transition-all"
                       data-testid={`mode-${opt.id}`}
                     >
@@ -286,31 +325,57 @@ export default function Simulator() {
                   {mode === "uni-y-carrera" && "Elige universidad y carrera"}
                   {mode === "por-carrera" && "Elige una carrera"}
                   {mode === "por-universidad" && "Elige una universidad"}
+                  {mode === "por-ciudad" && "Elige ciudad y carrera"}
                 </h2>
                 <p className="text-sm text-muted-foreground mb-6">
                   {mode === "uni-y-carrera" && "Encuentra el puntaje exacto que necesitas"}
                   {mode === "por-carrera" && "Compara opciones en distintas universidades"}
                   {mode === "por-universidad" && "Explora todas las carreras disponibles"}
+                  {mode === "por-ciudad" && "Filtra por ciudad y, si quieres, por universidad"}
                 </p>
 
                 <div className="space-y-5">
-                  {/* Universidad selector (for uni-y-carrera and por-universidad) */}
-                  {(mode === "uni-y-carrera" || mode === "por-universidad") && (
+                  {/* Ciudad selector (only for por-ciudad) */}
+                  {mode === "por-ciudad" && (
                     <div className="space-y-2">
                       <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        Universidad
+                        Ciudad
                       </Label>
                       <Combobox
-                        options={universidadOptions}
+                        options={ciudadOptions}
+                        value={ciudad}
+                        onChange={(v) => { setCiudad(v); setUniversidad(""); setCarreraId(null); }}
+                        placeholder="Selecciona o escribe una ciudad"
+                        testId="combobox-ciudad"
+                      />
+                    </div>
+                  )}
+
+                  {/* Universidad selector (for uni-y-carrera, por-universidad, and por-ciudad) */}
+                  {(mode === "uni-y-carrera" || mode === "por-universidad" || mode === "por-ciudad") && (
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        Universidad{mode === "por-ciudad" ? " (opcional)" : ""}
+                      </Label>
+                      <Combobox
+                        options={mode === "por-ciudad" ? universidadOptionsByCiudad : universidadOptions}
                         value={universidad}
                         onChange={(v) => { setUniversidad(v); setCarreraId(null); }}
-                        placeholder="Selecciona o escribe una universidad"
+                        placeholder={
+                          mode === "por-ciudad" && !ciudad
+                            ? "Primero selecciona la ciudad"
+                            : mode === "por-ciudad"
+                            ? "Cualquier universidad de la ciudad"
+                            : "Selecciona o escribe una universidad"
+                        }
+                        disabled={mode === "por-ciudad" && !ciudad}
+                        emptyMsg="No hay universidades disponibles"
                         testId="combobox-universidad"
                       />
                     </div>
                   )}
 
-                  {/* Carrera selector (for uni-y-carrera, por-carrera, por-universidad) */}
+                  {/* Carrera selector (always) */}
                   <div className="space-y-2">
                     <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                       Carrera
@@ -322,9 +387,14 @@ export default function Simulator() {
                       placeholder={
                         mode === "uni-y-carrera" && !universidad
                           ? "Primero selecciona la universidad"
+                          : mode === "por-ciudad" && !ciudad
+                          ? "Primero selecciona la ciudad"
                           : "Selecciona o escribe una carrera"
                       }
-                      disabled={mode === "uni-y-carrera" && !universidad}
+                      disabled={
+                        (mode === "uni-y-carrera" && !universidad) ||
+                        (mode === "por-ciudad" && !ciudad)
+                      }
                       emptyMsg="No hay carreras disponibles"
                       testId="combobox-carrera"
                     />

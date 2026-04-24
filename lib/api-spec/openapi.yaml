@@ -65,6 +65,10 @@ paths:
           in: query
           schema:
             type: ["string", "null"]
+        - name: ciudad
+          in: query
+          schema:
+            type: ["string", "null"]
         - name: universidad
           in: query
           schema:
@@ -91,7 +95,16 @@ paths:
     get:
       operationId: getCarreraFilters
       tags: [carreras]
-      summary: Get available filter options (regions, universities, areas)
+      summary: Get available filter options (regions, cities, universities, areas)
+      parameters:
+        - name: ciudad
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: universidad
+          in: query
+          schema:
+            type: ["string", "null"]
       responses:
         "200":
           description: Filter options
@@ -566,6 +579,10 @@ components:
           type: array
           items:
             type: string
+        ciudades:
+          type: array
+          items:
+            type: string
         universidades:
           type: array
           items:
@@ -576,6 +593,7 @@ components:
             type: string
       required:
         - regiones
+        - ciudades
         - universidades
         - areas
 
