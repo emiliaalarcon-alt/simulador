@@ -141,7 +141,12 @@ export default function Simulator() {
     if (!allCarreras) return [];
     return allCarreras.map(c => ({
       value: String(c.id),
-      label: mode === "por-carrera" ? `${c.nombre} — ${c.universidad}` : c.nombre,
+      label:
+        mode === "por-carrera"
+          ? `${c.nombre} — ${c.universidad} (${c.ciudad})`
+          : mode === "por-universidad"
+          ? `${c.nombre} (${c.ciudad})`
+          : c.nombre,
     }));
   }, [allCarreras, mode]);
 
@@ -152,7 +157,7 @@ export default function Simulator() {
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Logo size="md" />
+          <Logo size="lg" />
           {step > 1 && (
             <Button variant="ghost" size="sm" onClick={reset} className="gap-1.5 text-muted-foreground" data-testid="button-reset">
               <RotateCcw className="w-3.5 h-3.5" />
