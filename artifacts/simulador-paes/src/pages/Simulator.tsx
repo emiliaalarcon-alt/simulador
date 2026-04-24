@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  GraduationCap, BookOpen, Building2, MapPinned,
+  Building2, MapPinned,
   ChevronRight, ChevronLeft, RotateCcw, Trophy,
   Sparkles, Calculator, MapPin
 } from "lucide-react";
@@ -11,8 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/Combobox";
 import { Logo } from "@/components/Logo";
 import { useListCarreras, useGetCarreraFilters, useGetCarrera } from "@workspace/api-client-react";
-
-type Mode = "uni-y-carrera" | "por-carrera" | "por-universidad" | "por-ciudad";
 
 const TEST_LABELS: Record<string, { label: string; short: string }> = {
   CL: { label: "Competencia Lectora", short: "CL" },
@@ -62,29 +60,31 @@ const COLOR_STYLES = {
 
 export default function Simulator() {
   const [step, setStep] = useState(1);
-  const [mode, setMode] = useState<Mode | null>(null);
   const [ciudad, setCiudad] = useState<string>("");
   const [universidad, setUniversidad] = useState<string>("");
   const [carreraId, setCarreraId] = useState<number | null>(null);
   const [scores, setScores] = useState<Record<string, string>>({});
   const [puntajeFinal, setPuntajeFinal] = useState<number | null>(null);
 
-  // Global (unfiltered) filter options — used for the universidad selector in
-  // uni-y-carrera / por-universidad modes and for the ciudades list in por-ciudad.
+  // List of available cities (loaded eagerly so step 2 opens instantly).
   const { data: filters } = useGetCarreraFilters();
-  // City-scoped filters — used by por-ciudad mode to constrain the universidades
-  // to those that actually appear in the selected city.
+  // Universities scoped to the selected city.
   const { data: cityFilters } = useGetCarreraFilters(
     { ciudad: ciudad || undefined },
-    { query: { enabled: mode === "por-ciudad" && !!ciudad, queryKey: ["sim-city-filters", ciudad] } }
+    { query: { enabled: !!ciudad, queryKey: ["sim-city-filters", ciudad] } }
   );
-  // Fetch carreras for the current selectors (used for combobox options on step 2)
+  // Carreras scoped to ciudad + universidad.
   const { data: allCarreras } = useListCarreras(
     {
+      ciudad: ciudad || undefined,
       universidad: universidad || undefined,
-      ciudad: mode === "por-ciudad" ? (ciudad || undefined) : undefined,
     },
-    { query: { enabled: step === 2, queryKey: ["sim-carreras", universidad, ciudad, mode] } }
+    {
+      query: {
+        enabled: step === 2 && !!ciudad && !!universidad,
+        queryKey: ["sim-carreras", ciudad, universidad],
+      },
+    }
   );
   const { data: selectedCarrera } = useGetCarrera(carreraId!, {
     query: { enabled: !!carreraId && step >= 3, queryKey: ["sim-carrera", carreraId] }
@@ -92,7 +92,6 @@ export default function Simulator() {
 
   const reset = () => {
     setStep(1);
-    setMode(null);
     setCiudad("");
     setUniversidad("");
     setCarreraId(null);
@@ -145,12 +144,7 @@ export default function Simulator() {
     if (carreraId) setScores({});
   }, [carreraId]);
 
-  const universidadOptions = useMemo(
-    () => filters?.universidades?.map(u => ({ value: u, label: u })) ?? [],
-    [filters]
-  );
-
-  // Universidades scoped to the selected city for por-ciudad mode.
+  // Universidades scoped to the selected city.
   const universidadOptionsByCiudad = useMemo(
     () => cityFilters?.universidades?.map(u => ({ value: u, label: u })) ?? [],
     [cityFilters]
@@ -163,18 +157,12 @@ export default function Simulator() {
 
   const carreraOptions = useMemo(() => {
     if (!allCarreras) return [];
+    // Universidad is already chosen, so the carrera label only needs the name.
     return allCarreras.map(c => ({
       value: String(c.id),
-      label:
-        mode === "por-carrera"
-          ? `${c.nombre} — ${c.universidad} (${c.ciudad})`
-          : mode === "por-universidad"
-          ? `${c.nombre} (${c.ciudad})`
-          : mode === "por-ciudad"
-          ? (universidad ? `${c.nombre}` : `${c.nombre} — ${c.universidad}`)
-          : `${c.nombre} (${c.ciudad})`,
+      label: c.nombre,
     }));
-  }, [allCarreras, mode, universidad]);
+  }, [allCarreras]);
 
   const totalSteps = 4;
 
@@ -204,7 +192,7 @@ export default function Simulator() {
 
       <main className="max-w-3xl mx-auto px-4 py-8 pb-20">
         <AnimatePresence mode="wait">
-          {/* ========== STEP 1: Mode selection ========== */}
+          {/* ========== STEP 1: Landing — MAT21 logo + CTA ========== */}
           {step === 1 && (
             <motion.div
               key="step1"
@@ -212,102 +200,46 @@ export default function Simulator() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
+              className="pt-8 sm:pt-16"
             >
-              <div className="text-center mb-8">
+              <div className="text-center">
                 <motion.div
-                  initial={{ scale: 0.5, opacity: 0 }}
+                  initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1, type: "spring" }}
-                  className="inline-flex w-20 h-20 rounded-3xl bg-gradient-to-br from-sky-500 to-primary items-center justify-center mb-4 shadow-lg shadow-primary/30"
+                  transition={{ delay: 0.05, type: "spring" }}
+                  className="inline-flex mb-8"
                 >
-                  <Sparkles className="w-10 h-10 text-white" />
+                  <Logo size="xl" />
                 </motion.div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-                  Simula tu puntaje PAES
+
+                <h1 className="text-3xl sm:text-5xl font-black text-foreground mb-3 leading-tight">
+                  Simula tu puntaje aquí
                 </h1>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Descubre si alcanzas el puntaje de corte para la carrera de tus sueños
+                <p className="text-base sm:text-lg text-muted-foreground max-w-md mx-auto mb-10">
+                  Elige tu ciudad, universidad y carrera para descubrir si alcanzas el puntaje de corte.
                 </p>
-              </div>
 
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-center">
-                  ¿Cómo quieres simular?
-                </h2>
-                <div className="grid gap-3">
-                  {[
-                    {
-                      id: "uni-y-carrera" as Mode,
-                      icon: GraduationCap,
-                      title: "Por Universidad y Carrera",
-                      desc: "Simula el puntaje exacto que necesitas para una carrera específica en una universidad",
-                      color: "from-sky-500 to-blue-600",
-                      recommended: true,
-                    },
-                    {
-                      id: "por-carrera" as Mode,
-                      icon: BookOpen,
-                      title: "Por Carrera",
-                      desc: "Compara una carrera en distintas universidades del país",
-                      color: "from-blue-500 to-cyan-600",
-                    },
-                    {
-                      id: "por-universidad" as Mode,
-                      icon: Building2,
-                      title: "Por Universidad",
-                      desc: "Explora todas las carreras disponibles en una universidad",
-                      color: "from-emerald-500 to-teal-600",
-                    },
-                    {
-                      id: "por-ciudad" as Mode,
-                      icon: MapPinned,
-                      title: "Por Ciudad",
-                      desc: "Encuentra carreras en una ciudad específica del país",
-                      color: "from-amber-500 to-orange-600",
-                    },
-                  ].map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => {
-                        setMode(opt.id);
-                        setCiudad("");
-                        setUniversidad("");
-                        setCarreraId(null);
-                        setStep(2);
-                      }}
-                      className="group relative bg-white rounded-2xl border-2 border-border p-5 text-left hover:border-primary hover:shadow-lg transition-all"
-                      data-testid={`mode-${opt.id}`}
-                    >
-                      {opt.recommended && (
-                        <span className="absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
-                          Recomendado
-                        </span>
-                      )}
-                      <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${opt.color} flex items-center justify-center flex-shrink-0 shadow-md`}>
-                          <opt.icon className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-foreground mb-1">{opt.title}</h3>
-                          <p className="text-sm text-muted-foreground">{opt.desc}</p>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 self-center" />
-                      </div>
-                    </button>
-                  ))}
+                <Button
+                  onClick={() => setStep(2)}
+                  className="gap-2 h-14 px-10 text-base font-bold rounded-2xl shadow-lg shadow-primary/30"
+                  data-testid="button-start-simular"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Simular ahora
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+
+                <div className="mt-12 mx-auto max-w-md p-4 bg-sky-50 rounded-xl border border-sky-100 text-center">
+                  <p className="text-xs text-sky-700 font-medium">
+                    Simulador referencial basado en datos oficiales DEMRE 2026. Los puntajes de corte cambian cada año.
+                  </p>
                 </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-sky-50 rounded-xl border border-sky-100 text-center">
-                <p className="text-xs text-sky-700 font-medium">
-                  Recuerda que este es un simulador referencial. Los puntajes de corte cambian cada año.
-                </p>
               </div>
             </motion.div>
           )}
 
-          {/* ========== STEP 2: Selectors ========== */}
-          {step === 2 && mode && (
+          {/* ========== STEP 2: Ciudad → Universidad → Carrera ========== */}
+          {step === 2 && (
             <motion.div
               key="step2"
               initial={{ opacity: 0, x: 30 }}
@@ -317,84 +249,72 @@ export default function Simulator() {
             >
               <Button variant="ghost" size="sm" onClick={goBack} className="mb-4 gap-1.5 text-muted-foreground -ml-2" data-testid="button-back-step2">
                 <ChevronLeft className="w-4 h-4" />
-                Cambiar tipo
+                Volver
               </Button>
 
               <div className="bg-white rounded-2xl shadow-md border border-border p-6 sm:p-8">
                 <h2 className="text-2xl font-bold text-foreground mb-1">
-                  {mode === "uni-y-carrera" && "Elige universidad y carrera"}
-                  {mode === "por-carrera" && "Elige una carrera"}
-                  {mode === "por-universidad" && "Elige una universidad"}
-                  {mode === "por-ciudad" && "Elige ciudad y carrera"}
+                  Elige ciudad, universidad y carrera
                 </h2>
                 <p className="text-sm text-muted-foreground mb-6">
-                  {mode === "uni-y-carrera" && "Encuentra el puntaje exacto que necesitas"}
-                  {mode === "por-carrera" && "Compara opciones en distintas universidades"}
-                  {mode === "por-universidad" && "Explora todas las carreras disponibles"}
-                  {mode === "por-ciudad" && "Filtra por ciudad y, si quieres, por universidad"}
+                  Selecciona en orden para encontrar tu carrera.
                 </p>
 
                 <div className="space-y-5">
-                  {/* Ciudad selector (only for por-ciudad) */}
-                  {mode === "por-ciudad" && (
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        Ciudad
-                      </Label>
-                      <Combobox
-                        options={ciudadOptions}
-                        value={ciudad}
-                        onChange={(v) => { setCiudad(v); setUniversidad(""); setCarreraId(null); }}
-                        placeholder="Selecciona o escribe una ciudad"
-                        testId="combobox-ciudad"
-                      />
-                    </div>
-                  )}
-
-                  {/* Universidad selector (for uni-y-carrera, por-universidad, and por-ciudad) */}
-                  {(mode === "uni-y-carrera" || mode === "por-universidad" || mode === "por-ciudad") && (
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        Universidad{mode === "por-ciudad" ? " (opcional)" : ""}
-                      </Label>
-                      <Combobox
-                        options={mode === "por-ciudad" ? universidadOptionsByCiudad : universidadOptions}
-                        value={universidad}
-                        onChange={(v) => { setUniversidad(v); setCarreraId(null); }}
-                        placeholder={
-                          mode === "por-ciudad" && !ciudad
-                            ? "Primero selecciona la ciudad"
-                            : mode === "por-ciudad"
-                            ? "Cualquier universidad de la ciudad"
-                            : "Selecciona o escribe una universidad"
-                        }
-                        disabled={mode === "por-ciudad" && !ciudad}
-                        emptyMsg="No hay universidades disponibles"
-                        testId="combobox-universidad"
-                      />
-                    </div>
-                  )}
-
-                  {/* Carrera selector (always) */}
+                  {/* Ciudad */}
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      Carrera
+                    <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <MapPinned className="w-3.5 h-3.5" />
+                      1. Ciudad
+                    </Label>
+                    <Combobox
+                      options={ciudadOptions}
+                      value={ciudad}
+                      onChange={(v) => { setCiudad(v); setUniversidad(""); setCarreraId(null); }}
+                      placeholder="Selecciona o escribe una ciudad"
+                      testId="combobox-ciudad"
+                    />
+                  </div>
+
+                  {/* Universidad (scoped to ciudad) */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5" />
+                      2. Universidad
+                    </Label>
+                    <Combobox
+                      options={universidadOptionsByCiudad}
+                      value={universidad}
+                      onChange={(v) => { setUniversidad(v); setCarreraId(null); }}
+                      placeholder={
+                        !ciudad
+                          ? "Primero selecciona la ciudad"
+                          : "Selecciona o escribe una universidad"
+                      }
+                      disabled={!ciudad}
+                      emptyMsg="No hay universidades disponibles"
+                      testId="combobox-universidad"
+                    />
+                  </div>
+
+                  {/* Carrera (scoped to ciudad + universidad) */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      3. Carrera
                     </Label>
                     <Combobox
                       options={carreraOptions}
                       value={carreraId ? String(carreraId) : ""}
                       onChange={(v) => setCarreraId(parseInt(v))}
                       placeholder={
-                        mode === "uni-y-carrera" && !universidad
-                          ? "Primero selecciona la universidad"
-                          : mode === "por-ciudad" && !ciudad
+                        !ciudad
                           ? "Primero selecciona la ciudad"
+                          : !universidad
+                          ? "Primero selecciona la universidad"
                           : "Selecciona o escribe una carrera"
                       }
-                      disabled={
-                        (mode === "uni-y-carrera" && !universidad) ||
-                        (mode === "por-ciudad" && !ciudad)
-                      }
+                      disabled={!ciudad || !universidad}
                       emptyMsg="No hay carreras disponibles"
                       testId="combobox-carrera"
                     />

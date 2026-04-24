@@ -1,7 +1,7 @@
 import logoUrl from "@assets/images_1777057834199.png";
 
 interface LogoProps {
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
   variant?: "default" | "white";
 }
@@ -10,6 +10,7 @@ const SIZE_MAP = {
   sm: { circle: "w-8 h-8", letter: "text-base", title: "text-base", subtitle: "text-[9px]", img: "h-8" },
   md: { circle: "w-10 h-10", letter: "text-xl", title: "text-lg", subtitle: "text-[10px]", img: "h-10" },
   lg: { circle: "w-14 h-14", letter: "text-3xl", title: "text-2xl", subtitle: "text-xs", img: "h-14" },
+  xl: { circle: "w-24 h-24", letter: "text-5xl", title: "text-4xl", subtitle: "text-sm", img: "h-24 sm:h-28" },
 };
 
 export function Logo({ size = "md", showText = true, variant = "default" }: LogoProps) {
