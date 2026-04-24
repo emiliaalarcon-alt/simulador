@@ -10,7 +10,7 @@ const SIZE_MAP = {
   sm: { img: "h-8" },
   md: { img: "h-10" },
   lg: { img: "h-14" },
-  xl: { img: "h-44 sm:h-56 md:h-64" },
+  xl: { img: "h-56 sm:h-72 md:h-80" },
 };
 
 export function Logo({ size = "md", variant = "default" }: LogoProps) {

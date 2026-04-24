@@ -293,7 +293,7 @@ export default function Simulator() {
                   initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.05, type: "spring" }}
-                  className="inline-flex mb-8"
+                  className="flex justify-center mb-8"
                 >
                   <Logo size="xl" />
                 </motion.div>
