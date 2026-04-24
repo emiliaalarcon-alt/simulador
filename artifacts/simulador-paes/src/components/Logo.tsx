@@ -1,3 +1,5 @@
+import logoUrl from "@assets/images_1777057834199.png";
+
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
@@ -5,15 +7,31 @@ interface LogoProps {
 }
 
 const SIZE_MAP = {
-  sm: { circle: "w-8 h-8", letter: "text-base", title: "text-base", subtitle: "text-[9px]" },
-  md: { circle: "w-10 h-10", letter: "text-xl", title: "text-lg", subtitle: "text-[10px]" },
-  lg: { circle: "w-14 h-14", letter: "text-3xl", title: "text-2xl", subtitle: "text-xs" },
+  sm: { circle: "w-8 h-8", letter: "text-base", title: "text-base", subtitle: "text-[9px]", img: "h-8" },
+  md: { circle: "w-10 h-10", letter: "text-xl", title: "text-lg", subtitle: "text-[10px]", img: "h-10" },
+  lg: { circle: "w-14 h-14", letter: "text-3xl", title: "text-2xl", subtitle: "text-xs", img: "h-14" },
 };
 
 export function Logo({ size = "md", showText = true, variant = "default" }: LogoProps) {
   const s = SIZE_MAP[size];
   const isWhite = variant === "white";
 
+  // On light backgrounds, use the real MAT 21 lockup image.
+  if (!isWhite && showText) {
+    return (
+      <div className="flex items-center">
+        <img
+          src={logoUrl}
+          alt="MAT 21 Preuniversitario"
+          className={`${s.img} w-auto object-contain`}
+          draggable={false}
+        />
+      </div>
+    );
+  }
+
+  // White variant (on blue backgrounds) and icon-only fall back to the CSS lockup,
+  // since the PNG's dark "AT 21" text would be unreadable on the brand blue.
   return (
     <div className="flex items-center gap-2">
       <div
