@@ -32,6 +32,7 @@ jobs:
       - name: Build
         env:
           PORT: 3000
+          BASE_PATH: /simulador/
         run: pnpm --filter simulador-paes build
 
       - name: Deploy
@@ -42,4 +43,4 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: artifacts/simulador-paes/dist
+          path: artifacts/simulador-paes/dist/public
