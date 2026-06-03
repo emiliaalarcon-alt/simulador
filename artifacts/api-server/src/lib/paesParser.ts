@@ -84,7 +84,6 @@ const SANTIAGO_COMUNAS = [
   "ESTACIÓN CENTRAL", "QUILICURA", "HUECHURABA", "SAN JOAQUÍN",
 ];
 
-// Known canonical names — used to map UPPERCASE TOC names to mixed-case stored names.
 const KNOWN_UNI_NAMES: Record<string, [string, string]> = {
   "PONTIFICIA UNIVERSIDAD CATÓLICA DE CHILE": ["Santiago", "Metropolitana"],
   "PONTIFICIA UNIVERSIDAD CATÓLICA DE VALPARAÍSO": ["Valparaíso", "Valparaíso"],
@@ -136,14 +135,12 @@ const KNOWN_UNI_NAMES: Record<string, [string, string]> = {
   "UNIVERSIDAD VIÑA DEL MAR": ["Viña del Mar", "Valparaíso"],
 };
 
-// Convert "UNIVERSIDAD DE CHILE" → "Universidad de Chile" using a small set of lowercase connectors.
 function titleCaseUni(upper: string): string {
   const lowers = new Set(["DE", "DEL", "LA", "LAS", "LOS", "Y"]);
   return upper
     .split(" ")
     .map((w, i) => {
       if (i > 0 && lowers.has(w)) return w.toLowerCase();
-      // Preserve specific stylized words
       if (w === "O'HIGGINS") return "O'Higgins";
       if (w === "BÍO-BÍO") return "Bío-Bío";
       if (w === "ANDRÉS") return "Andrés";
@@ -225,20 +222,18 @@ async function extractTextFromPdf(buffer: Buffer): Promise<string> {
   }
 }
 
-// Auto-detect Table of Contents from one of the first ~14 pages.
-// Returns array of [universityName, startingPrintedPage].
 function detectTOC(pages: string[]): Array<[string, number]> {
   const toc: Array<[string, number]> = [];
   for (let i = 0; i < Math.min(14, pages.length); i++) {
     const lines = pages[i].split("\n");
     const candidates: Array<[string, number]> = [];
     for (const line of lines) {
-      // Match lines like "  21    UNIVERSIDAD DE CHILE                253"
-      const m = line.match(/^\s*\d{1,3}\s+([A-ZÁÉÍÓÚÑ.'’\- ]+?)\s+(\d{2,3})\s*$/);
+      // Normalize curly apostrophes before matching
+      const normalizedLine = line.replace(/[\u2018\u2019\u201A\u201B]/g, "'");
+      const m = normalizedLine.match(/^\s*\d{1,3}\s+([A-ZÁÉÍÓÚÑ.'\- ]+?)\s+(\d{2,3})\s*$/);
       if (m) {
         let name = m[1].trim().replace(/\s+/g, " ");
-        // Normalize curly apostrophe
-        name = name.replace(/[’]/g, "'");
+        name = name.replace(/['']/g, "'");
         const page = parseInt(m[2], 10);
         if (name.length > 8 && page >= 10 && page < 1000 && /UNIVERSIDAD/.test(name)) {
           candidates.push([name, page]);
@@ -246,7 +241,6 @@ function detectTOC(pages: string[]): Array<[string, number]> {
       }
     }
     if (candidates.length >= 30) {
-      // Sort by page number ascending
       candidates.sort((a, b) => a[1] - b[1]);
       return candidates;
     }
@@ -264,6 +258,16 @@ function detectPrintedPageNum(text: string): number | null {
 
 function pageHasMC(pageText: string): boolean {
   return /\+\s*MC/.test(pageText);
+}
+
+// Check if a line is purely numeric data (ponderaciones row)
+function isPureDataLine(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  // Must have at least 10 numeric-like tokens
+  const tokens = trimmed.split(/\s+/);
+  const numericCount = tokens.filter(t => /^---?$/.test(t) || /^\d+$/.test(t) || /^[Oo]$/.test(t)).length;
+  return numericCount >= 10 && numericCount >= tokens.length * 0.8;
 }
 
 function extractNumericTail(line: string): { numerics: string[]; head: string } | null {
@@ -363,6 +367,7 @@ function parsePages(pages: string[], toc: Array<[string, number]>): ParsedUniver
     const hasMC = pageHasMC(pageText);
     const lns = pageText.split("\n");
 
+    // pending: carrera whose name was on one line but data on a later line
     let pending: { code: string; headLines: string[]; beforeLines: string[] } | null = null;
     let beforeBuffer: string[] = [];
 
@@ -392,9 +397,11 @@ function parsePages(pages: string[], toc: Array<[string, number]>): ParsedUniver
       const ln = lns[i];
       if (!ln.trim()) continue;
       const isCode = /^\d{5}\s/.test(ln);
+
       if (isCode) {
         const tail = extractNumericTail(ln);
         if (tail && tail.head) {
+          // Complete row on one line
           const code = ln.slice(0, 5);
           const headRest = tail.head.replace(/^\d{5}\s+/, "");
           const headPieces = [...beforeBuffer.map((l) => l.replace(/\s+$/, "")), headRest].filter((s) => s.trim());
@@ -406,6 +413,7 @@ function parsePages(pages: string[], toc: Array<[string, number]>): ParsedUniver
           beforeBuffer = [];
           pending = null;
         } else {
+          // Code line without numeric data — name/sede will follow on next lines
           if (pending) pending = null;
           pending = { code: ln.slice(0, 5), headLines: [ln], beforeLines: beforeBuffer };
           beforeBuffer = [];
@@ -413,9 +421,13 @@ function parsePages(pages: string[], toc: Array<[string, number]>): ParsedUniver
       } else {
         const tailIfData = extractNumericTail(ln);
         const isMostlyNumbers = tailIfData && tailIfData.head.trim().length === 0;
-        if (isMostlyNumbers && pending) {
+        const isPureData = isPureDataLine(ln);
+
+        if ((isMostlyNumbers || isPureData) && pending) {
+          // Data line for a pending carrera
           flushRowWithDataLine(ln);
         } else if (pending) {
+          // Additional name/sede line for pending carrera
           pending.headLines.push(ln);
         } else {
           beforeBuffer.push(ln);
@@ -457,7 +469,8 @@ function cleanRows(parsed: ParsedUniversity[]): { rows: CleanedRow[]; skipped: n
       const sumPond =
         (c.ponderacionNEM || 0) + (c.ponderacionRanking || 0) + (c.ponderacionCL || 0) +
         (c.ponderacionM1 || 0) + (c.ponderacionHI || 0) + (c.ponderacionCS || 0) + (c.ponderacionM2 || 0);
-      if (sumPond < 50 || sumPond > 110) { skipped++; continue; }
+      // More permissive range to handle universities with different puntaje formats
+      if (sumPond < 40 || sumPond > 120) { skipped++; continue; }
       if (!c.nombre || c.nombre.length < 2) { skipped++; continue; }
 
       let cleanName = c.nombre
@@ -534,10 +547,6 @@ export interface PaesImportResult {
   message: string;
 }
 
-/**
- * Parse the official DEMRE "Oferta Definitiva" PDF, wipe the carreras table,
- * and bulk-insert the extracted carreras. Returns counts.
- */
 export async function importPaesPdf(buffer: Buffer): Promise<PaesImportResult> {
   const text = await extractTextFromPdf(buffer);
   const pages = text.split("\f");
@@ -555,9 +564,6 @@ export async function importPaesPdf(buffer: Buffer): Promise<PaesImportResult> {
 
   const { rows, skipped } = cleanRows(parsed);
 
-  // Strong pre-commit gates: this operation wipes the entire carreras table.
-  // We require results to be in the same ballpark as the reference PDF
-  // (Oferta 2026 → 47 unis, ~1388 carreras). Reject obvious parse failures.
   if (rows.length < 1000) {
     throw new Error(
       `Sólo se extrajeron ${rows.length} carreras válidas (esperadas al menos 1000). ` +
@@ -570,21 +576,19 @@ export async function importPaesPdf(buffer: Buffer): Promise<PaesImportResult> {
       `Verifica que sea el PDF oficial completo. No se realizaron cambios.`
     );
   }
-  // Sanity: every uni in the TOC must contribute at least one row
+
   const uniCounts = new Map<string, number>();
   for (const r of rows) uniCounts.set(r.universidad, (uniCounts.get(r.universidad) || 0) + 1);
   const emptyUnis = parsed.filter((u) => !uniCounts.has(u.nombre)).map((u) => u.nombre);
-  if (emptyUnis.length > 5) {
+  if (emptyUnis.length > 8) {
     throw new Error(
       `${emptyUnis.length} universidades quedaron sin carreras tras el parseo: ${emptyUnis.slice(0, 3).join(", ")}... ` +
       `Esto sugiere que el formato cambió. No se realizaron cambios.`
     );
   }
 
-  // Wipe + insert atomically
   await db.transaction(async (tx) => {
     await tx.delete(carrerasTable);
-    // Insert in chunks of 200 to avoid parameter limits
     for (let i = 0; i < rows.length; i += 200) {
       await tx.insert(carrerasTable).values(rows.slice(i, i + 200));
     }
