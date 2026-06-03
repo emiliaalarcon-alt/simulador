@@ -39,6 +39,9 @@ jobs:
           BASE_PATH: /simulador/
         run: pnpm --filter simulador-paes build
 
+      - name: Fix routing for SPA
+        run: cp artifacts/simulador-paes/dist/public/index.html artifacts/simulador-paes/dist/public/404.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
